@@ -1,5 +1,6 @@
 package com.sara.allmart.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -28,6 +29,7 @@ public class OrderItem {
             name="order_id",
             foreignKey = @ForeignKey(name = "fk_order_items_orders")
     )
+    @JsonIgnore
     private Order order;
 
     @ManyToOne(fetch = FetchType.LAZY)

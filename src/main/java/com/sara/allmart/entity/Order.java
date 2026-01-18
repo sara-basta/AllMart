@@ -3,6 +3,7 @@ package com.sara.allmart.entity;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.HashSet;
 import java.util.Set;
@@ -36,6 +37,11 @@ public class Order {
     private Address shippingAddress;
     private LocalDateTime createdAt;
 
+    @ManyToOne
+    @JoinColumn(name = "user_id")
+    private User user;
+
     @OneToMany(mappedBy = "order", cascade = CascadeType.ALL, orphanRemoval = true)
     private Set<OrderItem> items = new HashSet<>();
+    private BigDecimal totalAmount;
 }
