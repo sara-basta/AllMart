@@ -1,11 +1,11 @@
-package com.sara.allmart.dto.response;
+package com.sara.allmart.dto.request;
 
 import java.math.BigDecimal;
 
-public record ProductResponse(
+public record ProductRequest(
         String name,
         String description,
         BigDecimal price,
         Integer stockQuantity
-){
+) {
 }

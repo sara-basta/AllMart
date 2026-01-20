@@ -1,6 +1,5 @@
 package com.sara.allmart.dto.response;
 
-import com.sara.allmart.entity.Address;
 import com.sara.allmart.entity.OrderStatus;
 
 import java.math.BigDecimal;

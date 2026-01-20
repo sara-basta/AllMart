@@ -28,12 +28,11 @@ public class OrderMapper {
 
 
     public OrderItemResponse toItemResponse(OrderItem orderItem) {
-        Long productId = orderItem.getProduct().getId();
         String productName = orderItem.getProduct().getName();
         BigDecimal unitPrice = orderItem.getPriceAtPurchase();
         int quantity= orderItem.getQuantity();
         BigDecimal totalPrice= unitPrice.multiply(BigDecimal.valueOf(quantity));
 
-        return new OrderItemResponse (productId,productName,unitPrice,quantity,totalPrice);
+        return new OrderItemResponse (productName,unitPrice,quantity,totalPrice);
     }
 }
