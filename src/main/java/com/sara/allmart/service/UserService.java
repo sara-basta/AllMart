@@ -1,14 +1,13 @@
 package com.sara.allmart.service;
 
+import com.sara.allmart.dto.request.UserRequest;
 import com.sara.allmart.dto.response.UserResponse;
-import com.sara.allmart.entity.Role;
 import com.sara.allmart.entity.User;
 import com.sara.allmart.exception.ResourceNotFoundException;
 import com.sara.allmart.mapper.UserMapper;
 import com.sara.allmart.repository.UserRepository;
 import org.springframework.stereotype.Service;
 
-import java.util.Optional;
 
 @Service
 public class UserService {
@@ -20,13 +19,8 @@ public class UserService {
         this.userMapper = userMapper;
     }
 
-    public UserResponse createUser(String firstName, String lastName, String email, String password, Role role) {
-        User user = new User();
-        user.setFirstName(firstName);
-        user.setLastName(lastName);
-        user.setEmail(email);
-        user.setPassword(password);
-        user.setRole(role);
+    public UserResponse createUser(UserRequest request) {
+        User user = userMapper.toEntity(request);
         userRepository.save(user);
         return userMapper.toResponse(user);
     }

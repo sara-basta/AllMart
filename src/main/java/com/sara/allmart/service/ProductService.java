@@ -1,10 +1,13 @@
 package com.sara.allmart.service;
 
+import com.sara.allmart.dto.request.ProductRequest;
 import com.sara.allmart.dto.response.ProductResponse;
 import com.sara.allmart.entity.Product;
 import com.sara.allmart.exception.ResourceNotFoundException;
 import com.sara.allmart.mapper.ProductMapper;
 import com.sara.allmart.repository.ProductRepository;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
@@ -20,21 +23,16 @@ public class ProductService {
         this.productMapper = productMapper;
     }
 
-    public ProductResponse createProduct(String name, String description, BigDecimal price, Integer stock) {
-        Product product = new Product();
-        product.setName(name);
-        product.setDescription(description);
-        product.setPrice(price);
-        product.setStockQuantity(stock);
+    public ProductResponse createProduct(ProductRequest request) {
+        Product product = productMapper.toEntity(request);
         productRepository.save(product);
 
         return productMapper.toResponse(product);
     }
 
-    public List<ProductResponse> getAllProducts() {
-        return productRepository.findAll().stream()
-                .map(productMapper::toResponse)
-                .toList();
+    public Page<ProductResponse> getAllProducts(int page, int size) {
+        return productRepository.findAll(PageRequest.of(page,size))
+                .map(productMapper::toResponse);
     }
 
     public ProductResponse updatePrice(Long id, BigDecimal newPrice) {

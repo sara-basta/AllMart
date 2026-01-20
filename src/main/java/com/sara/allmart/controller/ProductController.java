@@ -5,9 +5,9 @@ import com.sara.allmart.dto.request.ProductRequest;
 import com.sara.allmart.dto.request.ProductStockRequest;
 import com.sara.allmart.dto.response.ProductResponse;
 import com.sara.allmart.service.ProductService;
+import org.springframework.data.domain.Page;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.List;
 
 @RestController
 @RequestMapping("/api/products")
@@ -20,12 +20,14 @@ public class ProductController {
 
     @PostMapping("/create")
     public ProductResponse createProduct(@RequestBody ProductRequest request){
-        return productService.createProduct(request.name(),request.description(),request.price(),request.stockQuantity());
+        return productService.createProduct(request);
     }
 
-    @GetMapping("/")
-    public List<ProductResponse> getAllProducts(){
-        return productService.getAllProducts();
+    @GetMapping
+    public Page<ProductResponse> getAllProducts(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "20") int size){
+        return productService.getAllProducts(page,size);
     }
 
     @PutMapping("/{id}/price")
