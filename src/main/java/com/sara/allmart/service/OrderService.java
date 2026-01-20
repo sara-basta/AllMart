@@ -2,6 +2,7 @@ package com.sara.allmart.service;
 
 import com.sara.allmart.dto.response.OrderResponse;
 import com.sara.allmart.entity.*;
+import com.sara.allmart.exception.ResourceNotFoundException;
 import com.sara.allmart.mapper.OrderMapper;
 import com.sara.allmart.repository.OrderRepository;
 import com.sara.allmart.repository.ProductRepository;
@@ -12,6 +13,7 @@ import org.springframework.stereotype.Service;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.HashSet;
+import java.util.List;
 
 @Service
 public class OrderService {
@@ -30,9 +32,9 @@ public class OrderService {
     @Transactional // so that if saving fails, stock goes back to normal (doesn't get decremented)
     public OrderResponse createOrder (Long userId, Long productId){
         User user = userRepository.findById(userId)
-                .orElseThrow(() -> new RuntimeException("User not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("User not found"));
         Product product = productRepository.findById(productId)
-                .orElseThrow(() -> new RuntimeException("Product not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("Product not found"));
 
         if(product.getStockQuantity()<1){
             throw new RuntimeException("Not in stock!");
@@ -65,11 +67,30 @@ public class OrderService {
         }
         order.getItems().add(item);
 
-        return OrderMapper.toResponse(orderRepository.save(order));
+        return orderMapper.toResponse(orderRepository.save(order));
     }
 
     public OrderResponse getOrderById(Long id) {
-        return OrderMapper.toResponse(orderRepository.findById(id)
-                .orElseThrow(()-> new RuntimeException("Order doesn't exist!")));
+        return orderMapper.toResponse(orderRepository.findById(id)
+                .orElseThrow(()-> new ResourceNotFoundException("Order not found!")));
+    }
+
+    public List<OrderResponse> getOrderByUser(Long id) {
+        User user = userRepository.findUserById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("User not found!"));
+        
+        List<Order> ordersByUser = orderRepository.findOrdersByUser(user);
+        
+        return ordersByUser.stream()
+                .map(orderMapper::toResponse)
+                .toList();
+    }
+
+    public OrderResponse updateStatus(Long id, OrderStatus newStatus) {
+        Order order = orderRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Order not found !"));
+        order.setStatus(newStatus);
+        orderRepository.save(order);
+        return orderMapper.toResponse(order);
     }
 }

@@ -11,7 +11,7 @@ public record OrderResponse(
         Long id,
         OrderStatus status,
         BigDecimal totalAmount,
-        Address shippingAddress,
+        String shippingCity,
         LocalDateTime orderDate,
         List<OrderItemResponse> items
 ) {
