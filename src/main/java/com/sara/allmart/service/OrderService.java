@@ -14,6 +14,7 @@ import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 @Service
 public class OrderService {
@@ -92,5 +93,48 @@ public class OrderService {
         order.setStatus(newStatus);
         orderRepository.save(order);
         return orderMapper.toResponse(order);
+    }
+
+    @Transactional
+    public OrderResponse createOrderFromCart(Long userId, List<CartItem> items) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new ResourceNotFoundException("User not found"));
+
+        Order order = new Order();
+        order.setUser(user);
+        order.setStatus(OrderStatus.PENDING);
+        order.setCreatedAt(LocalDateTime.now());
+
+        order.setShippingAddress(new Address("Agdal", "Rabat", 10100));
+
+        Set<OrderItem> orderItems = new HashSet<>();
+        BigDecimal totalOrderAmount = BigDecimal.ZERO;
+
+        for(CartItem cartItem : items){
+            Product product = cartItem.getProduct();
+            if (product.getStockQuantity() < cartItem.getQuantity()) {
+                throw new RuntimeException("Product " + product.getName() + " is out of stock!");
+            }
+
+            product.setStockQuantity(product.getStockQuantity() - cartItem.getQuantity());
+            productRepository.save(product);
+
+            OrderItem orderItem = new OrderItem();
+            orderItem.setOrder(order);
+            orderItem.setProduct(product);
+            orderItem.setQuantity(cartItem.getQuantity());
+            orderItem.setPriceAtPurchase(cartItem.getPrice());
+
+            orderItems.add(orderItem);
+
+            BigDecimal lineTotal = cartItem.getPrice().multiply(BigDecimal.valueOf(cartItem.getQuantity()));
+            totalOrderAmount = totalOrderAmount.add(lineTotal);
+        }
+
+        order.setItems(orderItems);
+        order.setTotalAmount(totalOrderAmount);
+
+        Order savedOrder = orderRepository.save(order);
+        return orderMapper.toResponse(savedOrder);
     }
 }

@@ -3,7 +3,6 @@ package com.sara.allmart.controller;
 import com.sara.allmart.dto.request.OrderRequest;
 import com.sara.allmart.dto.request.OrderStatusRequest;
 import com.sara.allmart.dto.response.OrderResponse;
-import com.sara.allmart.entity.OrderStatus;
 import com.sara.allmart.service.OrderService;
 import org.springframework.web.bind.annotation.*;
 
