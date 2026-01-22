@@ -1,56 +1,60 @@
 package com.sara.allmart.service;
 
+import com.sara.allmart.dto.response.CartResponse;
 import com.sara.allmart.entity.Cart;
 import com.sara.allmart.entity.CartItem;
 import com.sara.allmart.entity.Product;
 import com.sara.allmart.entity.User;
 import com.sara.allmart.exception.ResourceNotFoundException;
+import com.sara.allmart.mapper.CartMapper;
 import com.sara.allmart.repository.CartRepository;
 import com.sara.allmart.repository.ProductRepository;
 import com.sara.allmart.repository.UserRepository;
+import jakarta.transaction.Transactional;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
 import java.util.Optional;
 
-
+@Transactional
 @Service
 public class CartService {
     private final CartRepository cartRepository;
     private final UserRepository userRepository;
     private final ProductRepository productRepository;
     private final OrderService orderService;
+    private final CartMapper cartMapper;
 
-    public CartService(CartRepository cartRepository, UserRepository userRepository, ProductRepository productRepository, OrderService orderService) {
+    public CartService(CartRepository cartRepository, UserRepository userRepository, ProductRepository productRepository, OrderService orderService, CartMapper cartMapper) {
         this.cartRepository = cartRepository;
         this.userRepository = userRepository;
         this.productRepository = productRepository;
         this.orderService = orderService;
+        this.cartMapper = cartMapper;
     }
 
-    public Cart getCart(Long userId) {
+    private Cart getCartEntity(Long userId) {
         Optional<Cart> optionalCart = cartRepository.findCartByUserId(userId);
 
         if (optionalCart.isPresent()) {
             Cart cart = optionalCart.get();
-
             // Recalculate total just in case prices changed
             cart.calculateTotal();
-
             return cart;
         } else {
             User user = userRepository.findById(userId)
                     .orElseThrow(() -> new ResourceNotFoundException("User not found!"));
-
             Cart newCart = new Cart();
             newCart.setUser(user);
-
             return cartRepository.save(newCart);
         }
     }
+    public CartResponse getCart(Long userId) {
+        return cartMapper.toResponse(getCartEntity(userId));
+    }
 
-    public Cart addToCart(Long userId, Long productId, int quantity) {
-        Cart cart = getCart(userId);
+    public CartResponse addToCart(Long userId, Long productId, int quantity) {
+        Cart cart = getCartEntity(userId);
         Product product = productRepository.findById(productId)
                 .orElseThrow(() -> new ResourceNotFoundException("Product not found!"));
 
@@ -77,11 +81,11 @@ public class CartService {
         }
 
         cart.calculateTotal();
-        return cartRepository.save(cart);
+        return cartMapper.toResponse(cartRepository.save(cart));
     }
 
-    public Cart removeFromCart(Long userId, Long cartItemId) {
-        Cart cart = getCart(userId);
+    public CartResponse removeFromCart(Long userId, Long cartItemId) {
+        Cart cart = getCartEntity(userId);
 
         boolean removed = cart.getItems().removeIf(cartItem -> cartItem.getId().equals(cartItemId));
         if(removed){
@@ -91,18 +95,18 @@ public class CartService {
         else {
             throw new ResourceNotFoundException("No such item found in cart!");
         }
-        return cart;
+        return cartMapper.toResponse(cart);
     }
 
     public void clearCart(Long userId) {
-        Cart cart = getCart(userId);
+        Cart cart = getCartEntity(userId);
         cart.getItems().clear();
         cart.setTotalPrice(BigDecimal.ZERO);
         cartRepository.save(cart);
     }
 
     public void checkout(Long userId) {
-        Cart cart = getCart(userId);
+        Cart cart = getCartEntity(userId);
         if(!cart.getItems().isEmpty()){
             orderService.createOrderFromCart(userId,cart.getItems());
         }

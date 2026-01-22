@@ -11,7 +11,6 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
-import java.util.List;
 
 @Service
 public class ProductService {
@@ -36,7 +35,7 @@ public class ProductService {
     }
 
     public ProductResponse updatePrice(Long id, BigDecimal newPrice) {
-        Product product = productRepository.findProductById(id)
+        Product product = productRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Product not found!"));
         product.setPrice(newPrice);
         productRepository.save(product);
@@ -44,7 +43,7 @@ public class ProductService {
     }
 
     public ProductResponse updateStock(Long id, Integer newStock) {
-        Product product = productRepository.findProductById(id)
+        Product product = productRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Product not found!"));
         product.setStockQuantity(newStock);
         productRepository.save(product);

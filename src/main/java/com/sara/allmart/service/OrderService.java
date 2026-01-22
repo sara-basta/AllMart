@@ -96,7 +96,7 @@ public class OrderService {
     }
 
     @Transactional
-    public OrderResponse createOrderFromCart(Long userId, List<CartItem> items) {
+    public void createOrderFromCart(Long userId, List<CartItem> items) {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new ResourceNotFoundException("User not found"));
 
@@ -135,6 +135,6 @@ public class OrderService {
         order.setTotalAmount(totalOrderAmount);
 
         Order savedOrder = orderRepository.save(order);
-        return orderMapper.toResponse(savedOrder);
+        orderMapper.toResponse(savedOrder);
     }
 }
