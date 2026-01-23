@@ -9,6 +9,8 @@ import com.sara.allmart.service.ProductService;
 import org.springframework.data.domain.Page;
 import org.springframework.web.bind.annotation.*;
 
+import java.math.BigDecimal;
+
 
 @RestController
 @RequestMapping("/api/products")
@@ -25,10 +27,15 @@ public class ProductController {
     }
 
     @GetMapping
-    public Page<ProductResponse> getAllProducts(
+    public Page<ProductResponse> searchProducts(
+            @RequestParam(required = false) String name,
+            @RequestParam(required = false) Long categoryId,
+            @RequestParam(required = false) BigDecimal minPrice,
+            @RequestParam(required = false) BigDecimal maxPrice,
             @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "20") int size){
-        return productService.getAllProducts(page,size);
+            @RequestParam(defaultValue = "20") int size
+    ) {
+        return productService.searchProducts(name, categoryId, minPrice, maxPrice, page, size);
     }
 
     @PutMapping("/{id}/price")

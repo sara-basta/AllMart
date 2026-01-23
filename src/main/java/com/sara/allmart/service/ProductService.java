@@ -11,6 +11,7 @@ import com.sara.allmart.repository.CategoryRepository;
 import com.sara.allmart.repository.ProductRepository;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
@@ -32,11 +33,6 @@ public class ProductService {
         productRepository.save(product);
 
         return productMapper.toResponse(product);
-    }
-
-    public Page<ProductResponse> getAllProducts(int page, int size) {
-        return productRepository.findAll(PageRequest.of(page,size))
-                .map(productMapper::toResponse);
     }
 
     public ProductResponse updatePrice(Long id, BigDecimal newPrice) {
@@ -63,5 +59,11 @@ public class ProductService {
         product.setCategory(category);
         productRepository.save(product);
         return productMapper.toResponse(product);
+    }
+
+    public Page<ProductResponse> searchProducts(String name, Long categoryId, BigDecimal minPrice, BigDecimal maxPrice, int page, int size) {
+        Pageable pageable = PageRequest.of(page, size);
+        Page<Product> productPage = productRepository.searchProducts(name, categoryId, minPrice, maxPrice, pageable);
+        return productPage.map(productMapper::toResponse);
     }
 }
