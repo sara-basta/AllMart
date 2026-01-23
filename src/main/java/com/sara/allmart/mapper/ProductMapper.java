@@ -2,13 +2,21 @@ package com.sara.allmart.mapper;
 
 import com.sara.allmart.dto.request.ProductRequest;
 import com.sara.allmart.dto.response.ProductResponse;
+import com.sara.allmart.entity.Category;
 import com.sara.allmart.entity.Product;
+import com.sara.allmart.exception.ResourceNotFoundException;
+import com.sara.allmart.repository.CategoryRepository;
 import org.springframework.stereotype.Component;
 
 import java.math.BigDecimal;
 
 @Component
 public class ProductMapper {
+    private final CategoryRepository categoryRepository;
+
+    public ProductMapper(CategoryRepository categoryRepository) {
+        this.categoryRepository = categoryRepository;
+    }
 
     public Product toEntity(ProductRequest request){
         Product product = new Product();
@@ -16,6 +24,11 @@ public class ProductMapper {
         product.setDescription(request.description());
         product.setPrice(request.price());
         product.setStockQuantity(request.stockQuantity());
+        Category category = categoryRepository.findById(request.categoryId())
+                .orElseThrow(() -> new ResourceNotFoundException("Category not found"));
+
+        product.setCategory(category);
+
         return product;
     }
 
@@ -25,7 +38,10 @@ public class ProductMapper {
         String description = product.getDescription();
         BigDecimal price = product.getPrice();
         Integer stock = product.getStockQuantity();
-
-        return new ProductResponse(id,name,description,price,stock);
+        String categoryName = "Uncategorized";
+        if(product.getCategory() != null) {
+        categoryName = product.getCategory().getName();
+        }
+        return new ProductResponse(id,name,description,price,stock,categoryName);
     }
 }

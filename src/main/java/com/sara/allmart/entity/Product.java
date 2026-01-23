@@ -28,4 +28,7 @@ public class Product {
     private BigDecimal price;
     private Integer stockQuantity;
 
+    @ManyToOne
+    private Category category;
+
 }

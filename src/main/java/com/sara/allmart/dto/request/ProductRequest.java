@@ -6,6 +6,7 @@ public record ProductRequest(
         String name,
         String description,
         BigDecimal price,
-        Integer stockQuantity
+        Integer stockQuantity,
+        Long categoryId
 ) {
 }

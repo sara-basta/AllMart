@@ -1,5 +1,6 @@
 package com.sara.allmart.controller;
 
+import com.sara.allmart.dto.request.ProductCategoryRequest;
 import com.sara.allmart.dto.request.ProductPriceRequest;
 import com.sara.allmart.dto.request.ProductRequest;
 import com.sara.allmart.dto.request.ProductStockRequest;
@@ -38,5 +39,10 @@ public class ProductController {
     @PutMapping("/{id}/stock")
     public ProductResponse updateStock(@PathVariable Long id, @RequestBody ProductStockRequest request){
         return productService.updateStock(id,request.stock());
+    }
+
+    @PutMapping("{id}/category/update")
+    public ProductResponse updateCategory(@PathVariable Long id, @RequestBody ProductCategoryRequest request){
+        return productService.updateCategory(id,request);
     }
 }
