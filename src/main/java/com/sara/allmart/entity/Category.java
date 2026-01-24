@@ -1,6 +1,7 @@
 package com.sara.allmart.entity;
 
 import jakarta.persistence.*;
+import jakarta.validation.constraints.NotBlank;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -15,7 +16,7 @@ import java.util.List;
 @Getter
 @NoArgsConstructor
 @AllArgsConstructor
-public class Category {
+public class Category extends BaseEntity{
     @Id
     @SequenceGenerator(
             name = "category_id_seq",
@@ -27,7 +28,9 @@ public class Category {
             generator = "category_id_seq"
     )
     private Long id;
+    @NotBlank(message = "Category name is required")
     private String name;
+    @NotBlank(message = "Description is required")
     private String description;
 
     @OneToMany(mappedBy = "category",cascade = CascadeType.ALL,orphanRemoval = true)

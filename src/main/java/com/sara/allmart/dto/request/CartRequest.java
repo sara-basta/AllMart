@@ -1,4 +1,15 @@
 package com.sara.allmart.dto.request;
 
-public record CartRequest (Long userId, Long productId, int quantity) {
+import jakarta.validation.constraints.Min;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Positive;
+
+public record CartRequest (
+        @NotNull
+        Long userId,
+        @NotNull
+        Long productId,
+        @Positive @Min(1)
+        int quantity
+) {
 }

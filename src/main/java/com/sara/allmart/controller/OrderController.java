@@ -4,6 +4,9 @@ import com.sara.allmart.dto.request.OrderRequest;
 import com.sara.allmart.dto.request.OrderStatusRequest;
 import com.sara.allmart.dto.response.OrderResponse;
 import com.sara.allmart.service.OrderService;
+import jakarta.validation.Valid;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -17,23 +20,29 @@ public class OrderController {
         this.orderService = orderService;
     }
 
-    @PostMapping("/create")
-    public OrderResponse createOrder (@RequestBody OrderRequest request){
-        return orderService.createOrder(request.userId(),request.productId());
+    @PostMapping
+    public ResponseEntity<OrderResponse> createOrder (@Valid @RequestBody OrderRequest request){
+        OrderResponse response = orderService.createOrder(request.userId(), request.productId());
+        return new ResponseEntity<>(response, HttpStatus.CREATED);
     }
 
     @GetMapping("/{id}")
-    public OrderResponse getOrderById(@PathVariable Long id) {
-        return orderService.getOrderById(id);
+    public ResponseEntity<OrderResponse> getOrderById(@PathVariable Long id) {
+        OrderResponse response = orderService.getOrderById(id);
+        return ResponseEntity.ok(response);
     }
 
     @GetMapping("/user/{id}")
-    public List<OrderResponse> getOrderByUser(@PathVariable Long id){
-        return orderService.getOrderByUser(id);
+    public ResponseEntity<List<OrderResponse>> getOrderByUser(@PathVariable Long id){
+        List<OrderResponse> response = orderService.getOrderByUser(id);
+        return ResponseEntity.ok(response);
     }
 
-    @PutMapping("/{id}/status")
-    public OrderResponse updateStatus(@PathVariable Long id, @RequestBody OrderStatusRequest request){
-        return orderService.updateStatus(id,request.status());
+    @PatchMapping("/{id}/status")
+    public ResponseEntity<OrderResponse> updateStatus(@PathVariable Long id, @Valid @RequestBody OrderStatusRequest request){
+        OrderResponse response = orderService.updateStatus(id, request.status());
+        return ResponseEntity.ok(response);
     }
+
+    //TODO: add cancel order
 }

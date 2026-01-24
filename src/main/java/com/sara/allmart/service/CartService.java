@@ -75,7 +75,6 @@ public class CartService {
             newItem.setProduct(product);
             newItem.setCart(cart);
             newItem.setQuantity(quantity);
-            newItem.setPrice(product.getPrice());
 
             cart.getItems().add(newItem);
         }

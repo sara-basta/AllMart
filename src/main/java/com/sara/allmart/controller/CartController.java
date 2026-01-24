@@ -1,9 +1,10 @@
 package com.sara.allmart.controller;
 
-import com.sara.allmart.dto.request.CartRemoveRequest;
 import com.sara.allmart.dto.request.CartRequest;
 import com.sara.allmart.dto.response.CartResponse;
 import com.sara.allmart.service.CartService;
+import jakarta.validation.Valid;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -15,28 +16,32 @@ public class CartController {
         this.cartService = cartService;
     }
 
-    @PostMapping("/add")
-    public CartResponse addToCart(@RequestBody CartRequest request){
-        return cartService.addToCart(request.userId(), request.productId(), request.quantity());
+    @PostMapping
+    public ResponseEntity<CartResponse> addToCart(@Valid @RequestBody CartRequest request){
+        CartResponse response = cartService.addToCart(request.userId(), request.productId(), request.quantity());
+        return ResponseEntity.ok(response);
     }
 
-    @DeleteMapping("/remove")
-    public CartResponse removeFromCart(@RequestBody CartRemoveRequest request) {
-        return cartService.removeFromCart(request.userId(), request.cartItemId());
+    @DeleteMapping("/{userId}/items/{itemId}")
+    public ResponseEntity<CartResponse> removeFromCart(@PathVariable Long userId, @PathVariable Long itemId) {
+        CartResponse response = cartService.removeFromCart(userId, itemId);
+        return ResponseEntity.ok(response);
     }
 
-    @PostMapping ("/checkout")
-    public void checkout(@RequestParam Long userId){
+    @PostMapping ("/{userId}/checkout")
+    public ResponseEntity<String> checkout(@PathVariable Long userId){
         cartService.checkout(userId);
+        return ResponseEntity.ok("Checkout successful");
     }
 
-    @GetMapping
-    public CartResponse getCart(@RequestParam Long userId){
-        return cartService.getCart(userId);
+    @GetMapping("/{userId}")
+    public ResponseEntity<CartResponse> getCart(@PathVariable Long userId){
+        return ResponseEntity.ok(cartService.getCart(userId));
     }
 
-    @PostMapping ("/clear")
-    public void clearCart(@RequestParam Long userId){
+    @PostMapping ("/{userId}")
+    public ResponseEntity<Void> clearCart(@PathVariable Long userId){
         cartService.clearCart(userId);
+        return ResponseEntity.noContent().build();
     }
     }

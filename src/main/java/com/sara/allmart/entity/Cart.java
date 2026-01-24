@@ -1,6 +1,8 @@
 package com.sara.allmart.entity;
 
 import jakarta.persistence.*;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.PositiveOrZero;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -16,7 +18,7 @@ import java.util.List;
 @Getter
 @NoArgsConstructor
 @AllArgsConstructor
-public class Cart {
+public class Cart extends BaseEntity{
     @Id
     @SequenceGenerator(
             name = "cart_id_seq",
@@ -32,10 +34,11 @@ public class Cart {
     @OneToMany(mappedBy = "cart", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<CartItem> items = new ArrayList<>();
 
+    @NotNull(message = "User is required")
     @OneToOne
     @JoinColumn(name = "user_id")
     private User user;
-
+    @PositiveOrZero
     private BigDecimal totalPrice = BigDecimal.ZERO;
 
     public void calculateTotal() {

@@ -2,6 +2,9 @@ package com.sara.allmart.entity;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
+import jakarta.validation.constraints.Min;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Positive;
 import lombok.*;
 
 import java.math.BigDecimal;
@@ -24,6 +27,7 @@ public class OrderItem {
     )
     private Long id;
 
+    @NotNull
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(
             name="order_id",
@@ -32,6 +36,7 @@ public class OrderItem {
     @JsonIgnore
     private Order order;
 
+    @NotNull
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(
             name="product_id",
@@ -39,7 +44,10 @@ public class OrderItem {
     )
     private Product product;
 
-    private Integer quantity;
-    private BigDecimal priceAtPurchase;
+    @NotNull
+    @Min(value = 1, message = "Quantity must be at least 1")    private Integer quantity;
 
+    @NotNull
+    @Positive
+    private BigDecimal priceAtPurchase;
 }

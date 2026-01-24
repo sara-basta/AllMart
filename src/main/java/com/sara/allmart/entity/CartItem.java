@@ -1,6 +1,10 @@
 package com.sara.allmart.entity;
 
 import jakarta.persistence.*;
+import jakarta.validation.constraints.Min;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Positive;
+import jakarta.validation.constraints.PositiveOrZero;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -27,12 +31,24 @@ public class CartItem {
     )
     private Long id;
 
+    @NotNull
     @ManyToOne
+    @JoinColumn(name = "cart_id")
     private Cart cart;
 
+    @NotNull
     @ManyToOne
+    @JoinColumn(name = "product_id")
     private Product product;
 
+    @Positive
+    @Min(value = 1,message = "Quantity must be at least 1")
     private Integer quantity;
-    private BigDecimal price;
+
+    public BigDecimal getPrice() {
+        if (product != null) {
+            return product.getPrice();
+        }
+        return BigDecimal.ZERO;
+    }
 }

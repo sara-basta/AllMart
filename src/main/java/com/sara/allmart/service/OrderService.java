@@ -12,9 +12,8 @@ import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
-import java.util.HashSet;
+import java.util.ArrayList;
 import java.util.List;
-import java.util.Set;
 
 @Service
 public class OrderService {
@@ -61,10 +60,9 @@ public class OrderService {
         Address address = new Address("Anfa", "Casa", 10000);
         order.setShippingAddress(address);
         order.setUser(user);
-        order.setCreatedAt(LocalDateTime.now());
 
         if (order.getItems() == null) {
-            order.setItems(new HashSet<>());
+            order.setItems(new ArrayList<>());
         }
         order.getItems().add(item);
 
@@ -107,7 +105,7 @@ public class OrderService {
 
         order.setShippingAddress(new Address("Agdal", "Rabat", 10100));
 
-        Set<OrderItem> orderItems = new HashSet<>();
+        List<OrderItem> orderItems = new ArrayList<>();
         BigDecimal totalOrderAmount = BigDecimal.ZERO;
 
         for(CartItem cartItem : items){

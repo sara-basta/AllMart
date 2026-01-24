@@ -1,4 +1,11 @@
 package com.sara.allmart.dto.request;
 
-public record OrderRequest (Long userId, Long productId){
+import jakarta.validation.constraints.NotNull;
+
+public record OrderRequest (
+        @NotNull
+        Long userId,
+        @NotNull
+        Long productId
+){
 }
