@@ -6,6 +6,10 @@ import com.sara.allmart.dto.request.ProductRequest;
 import com.sara.allmart.dto.request.ProductStockRequest;
 import com.sara.allmart.dto.response.ProductResponse;
 import com.sara.allmart.service.ProductService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.PositiveOrZero;
@@ -21,6 +25,7 @@ import java.math.BigDecimal;
 @RestController
 @RequestMapping("/api/products")
 @Validated
+@Tag(name = "products", description = "Manage inventory, prices, and stock levels")
 public class ProductController {
     private final ProductService productService;
 
@@ -28,6 +33,13 @@ public class ProductController {
         this.productService = productService;
     }
 
+    @Operation(summary = "Create a new product",
+    description = "Adds a new product to the catalog. Requires a valid category ID.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "201", description = "Product created successfully"),
+            @ApiResponse(responseCode = "400", description = "Invalid input (e.g., negative price)"),
+            @ApiResponse(responseCode = "404", description = "Category not found")
+    })
     @PostMapping
     public ResponseEntity<ProductResponse> createProduct(@Valid @RequestBody ProductRequest request){
         ProductResponse response = productService.createProduct(request);

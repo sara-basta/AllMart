@@ -8,6 +8,7 @@ import com.sara.allmart.repository.OrderRepository;
 import com.sara.allmart.repository.ProductRepository;
 import com.sara.allmart.repository.UserRepository;
 import jakarta.transaction.Transactional;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
@@ -16,6 +17,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Service
+@Slf4j
 public class OrderService {
     private final OrderRepository orderRepository;
     private final ProductRepository productRepository;
@@ -31,12 +33,14 @@ public class OrderService {
 
     @Transactional // so that if saving fails, stock goes back to normal (doesn't get decremented)
     public OrderResponse createOrder (Long userId, Long productId){
+        log.info("Attempting to create order for User ID: {}", userId);
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new ResourceNotFoundException("User not found"));
         Product product = productRepository.findById(productId)
                 .orElseThrow(() -> new ResourceNotFoundException("Product not found"));
 
         if(product.getStockQuantity()<1){
+            log.warn("Order failed: Product ID {} is out of stock", productId);
             throw new RuntimeException("Not in stock!");
         }
 
@@ -65,13 +69,15 @@ public class OrderService {
             order.setItems(new ArrayList<>());
         }
         order.getItems().add(item);
-
+        log.info("Order successfully created");
         return orderMapper.toResponse(orderRepository.save(order));
     }
 
     public OrderResponse getOrderById(Long id) {
         return orderMapper.toResponse(orderRepository.findById(id)
-                .orElseThrow(()-> new ResourceNotFoundException("Order not found!")));
+                .orElseThrow(()-> {
+                    log.error("Order not found with ID: {}", id);
+                    return new ResourceNotFoundException("Order not found!");}));
     }
 
     public List<OrderResponse> getOrderByUser(Long id) {
@@ -132,7 +138,6 @@ public class OrderService {
         order.setItems(orderItems);
         order.setTotalAmount(totalOrderAmount);
 
-        Order savedOrder = orderRepository.save(order);
-        orderMapper.toResponse(savedOrder);
+        orderRepository.save(order);
     }
 }
