@@ -81,7 +81,7 @@ public class OrderService {
     }
 
     public List<OrderResponse> getOrderByUser(Long id) {
-        User user = userRepository.findUserById(id)
+        User user = userRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("User not found!"));
         
         List<Order> ordersByUser = orderRepository.findOrdersByUser(user);

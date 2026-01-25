@@ -26,7 +26,7 @@ public class UserService {
     }
 
     public UserResponse getUser(Long id) {
-        return userRepository.findUserById(id)
+        return userRepository.findById(id)
                 .map(userMapper::toResponse)
                 .orElseThrow(() -> new ResourceNotFoundException("User not found!"));
     }
