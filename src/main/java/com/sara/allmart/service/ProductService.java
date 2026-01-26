@@ -12,6 +12,7 @@ import com.sara.allmart.repository.ProductRepository;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
@@ -28,6 +29,7 @@ public class ProductService {
         this.categoryRepository = categoryRepository;
     }
 
+    @PreAuthorize("hasAuthority('ADMIN')")
     public ProductResponse createProduct(ProductRequest request) {
         Product product = productMapper.toEntity(request);
         productRepository.save(product);
@@ -35,6 +37,7 @@ public class ProductService {
         return productMapper.toResponse(product);
     }
 
+    @PreAuthorize("hasAuthority('ADMIN')")
     public ProductResponse updatePrice(Long id, BigDecimal newPrice) {
         Product product = productRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Product not found!"));
@@ -43,6 +46,7 @@ public class ProductService {
         return productMapper.toResponse(product);
     }
 
+    @PreAuthorize("hasAuthority('ADMIN')")
     public ProductResponse updateStock(Long id, Integer newStock) {
         Product product = productRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Product not found!"));
@@ -51,6 +55,7 @@ public class ProductService {
         return productMapper.toResponse(product);
     }
 
+    @PreAuthorize("hasAuthority('ADMIN')")
     public ProductResponse updateCategory(Long id, ProductCategoryRequest request) {
         Product product = productRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Product not found!"));
