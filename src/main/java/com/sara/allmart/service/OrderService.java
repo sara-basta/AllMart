@@ -7,6 +7,7 @@ import com.sara.allmart.exception.ResourceNotFoundException;
 import com.sara.allmart.mapper.OrderMapper;
 import com.sara.allmart.repository.OrderRepository;
 import com.sara.allmart.repository.ProductRepository;
+import com.sara.allmart.repository.SavedAddressRepository;
 import com.sara.allmart.repository.UserRepository;
 import jakarta.transaction.Transactional;
 import lombok.extern.slf4j.Slf4j;
@@ -24,12 +25,14 @@ public class OrderService {
     private final ProductRepository productRepository;
     private final UserRepository userRepository;
     private final OrderMapper orderMapper;
+    private final SavedAddressRepository savedAddressRepository;
 
-    OrderService(OrderRepository orderRepository, ProductRepository productRepository, UserRepository userRepository, OrderMapper orderMapper){
+    OrderService(OrderRepository orderRepository, ProductRepository productRepository, UserRepository userRepository, OrderMapper orderMapper, SavedAddressRepository savedAddressRepository){
         this.orderRepository = orderRepository;
         this.productRepository = productRepository;
         this.userRepository = userRepository;
         this.orderMapper = orderMapper;
+        this.savedAddressRepository = savedAddressRepository;
     }
 
     @Transactional // so that if saving fails, stock goes back to normal (doesn't get decremented)
@@ -61,8 +64,17 @@ public class OrderService {
         order.setTotalAmount(total);
 
         item.setOrder(order);
-        Address address = new Address("Anfa", "Casa", 10000);
-        order.setShippingAddress(address);
+        SavedAddress savedAddress = savedAddressRepository.findById(request.addressId())
+                .orElseThrow(() -> new RuntimeException("Address not found"));
+        if (!savedAddress.getUser().getEmail().equals(email)) {
+            throw new RuntimeException("Access Denied: You cannot use an address that isn't yours!");
+        }
+        Address shippingAddress = new Address(
+                savedAddress.getStreet(),
+                savedAddress.getCity(),
+                Integer.parseInt(savedAddress.getZipCode())
+        );
+        order.setShippingAddress(shippingAddress);
         order.setUser(user);
 
         if (order.getItems() == null) {
@@ -100,7 +112,7 @@ public class OrderService {
     }
 
     @Transactional
-    public void createOrderFromCart(String email, List<CartItem> items) {
+    public void createOrderFromCart(String email, List<CartItem> items,Long addressId) {
         User user = userRepository.findByEmail(email)
                 .orElseThrow(() -> new ResourceNotFoundException("User not found"));
 
@@ -109,8 +121,16 @@ public class OrderService {
         order.setStatus(OrderStatus.PENDING);
         order.setCreatedAt(LocalDateTime.now());
 
-        order.setShippingAddress(new Address("Agdal", "Rabat", 10100));
-
+        SavedAddress savedAddress = savedAddressRepository.findById(addressId)
+                .orElseThrow(() -> new RuntimeException("Address not found"));
+        if (!savedAddress.getUser().getEmail().equals(email)) {
+            throw new RuntimeException("Access Denied: You cannot use an address that isn't yours!");
+        }
+        Address shippingAddress = new Address(
+                savedAddress.getStreet(),
+                savedAddress.getCity(),
+                Integer.parseInt(savedAddress.getZipCode())
+        );
         List<OrderItem> orderItems = new ArrayList<>();
         BigDecimal totalOrderAmount = BigDecimal.ZERO;
 

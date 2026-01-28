@@ -40,6 +40,10 @@ public class User extends BaseEntity implements UserDetails {
     private String email;
     @NotBlank(message = "Password is required")
     private String password;
+
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL,orphanRemoval = true)
+    private List<SavedAddress> savedAddresses;
+
     @NotNull(message = "Role is required")
     @Enumerated(EnumType.STRING)
     private Role role;

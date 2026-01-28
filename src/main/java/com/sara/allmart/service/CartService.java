@@ -99,10 +99,10 @@ public class CartService {
         cartRepository.save(cart);
     }
 
-    public void checkout(String email) {
+    public void checkout(String email,Long addressId) {
         Cart cart = getCartEntity(email);
         if(!cart.getItems().isEmpty()){
-            orderService.createOrderFromCart(email,cart.getItems());
+            orderService.createOrderFromCart(email,cart.getItems(),addressId);
         }
         clearCart(email);
     }
