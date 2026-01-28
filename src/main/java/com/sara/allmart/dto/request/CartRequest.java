@@ -6,8 +6,6 @@ import jakarta.validation.constraints.Positive;
 
 public record CartRequest (
         @NotNull
-        Long userId,
-        @NotNull
         Long productId,
         @Positive @Min(1)
         int quantity

@@ -33,28 +33,23 @@ public class CartService {
         this.cartMapper = cartMapper;
     }
 
-    private Cart getCartEntity(Long userId) {
-        Optional<Cart> optionalCart = cartRepository.findCartByUserId(userId);
+    private Cart getCartEntity(String email) {
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new ResourceNotFoundException("User not found with email: " + email));
 
-        if (optionalCart.isPresent()) {
-            Cart cart = optionalCart.get();
-            // Recalculate total just in case prices changed
-            cart.calculateTotal();
-            return cart;
-        } else {
-            User user = userRepository.findById(userId)
-                    .orElseThrow(() -> new ResourceNotFoundException("User not found!"));
-            Cart newCart = new Cart();
-            newCart.setUser(user);
-            return cartRepository.save(newCart);
-        }
+        return cartRepository.findByUser(user)
+                .orElseGet(() -> {
+                    Cart newCart = new Cart();
+                    newCart.setUser(user);
+                    return cartRepository.save(newCart);
+                });
     }
-    public CartResponse getCart(Long userId) {
-        return cartMapper.toResponse(getCartEntity(userId));
+    public CartResponse getCart(String email) {
+        return cartMapper.toResponse(getCartEntity(email));
     }
 
-    public CartResponse addToCart(Long userId, Long productId, int quantity) {
-        Cart cart = getCartEntity(userId);
+    public CartResponse addToCart(String email,Long productId, int quantity) {
+        Cart cart = getCartEntity(email);
         Product product = productRepository.findById(productId)
                 .orElseThrow(() -> new ResourceNotFoundException("Product not found!"));
 
@@ -83,8 +78,8 @@ public class CartService {
         return cartMapper.toResponse(cartRepository.save(cart));
     }
 
-    public CartResponse removeFromCart(Long userId, Long cartItemId) {
-        Cart cart = getCartEntity(userId);
+    public CartResponse removeFromCart(String email, Long cartItemId) {
+        Cart cart = getCartEntity(email);
 
         boolean removed = cart.getItems().removeIf(cartItem -> cartItem.getId().equals(cartItemId));
         if(removed){
@@ -97,19 +92,19 @@ public class CartService {
         return cartMapper.toResponse(cart);
     }
 
-    public void clearCart(Long userId) {
-        Cart cart = getCartEntity(userId);
+    public void clearCart(String email) {
+        Cart cart = getCartEntity(email);
         cart.getItems().clear();
         cart.setTotalPrice(BigDecimal.ZERO);
         cartRepository.save(cart);
     }
 
-    public void checkout(Long userId) {
-        Cart cart = getCartEntity(userId);
+    public void checkout(String email) {
+        Cart cart = getCartEntity(email);
         if(!cart.getItems().isEmpty()){
-            orderService.createOrderFromCart(userId,cart.getItems());
+            orderService.createOrderFromCart(email,cart.getItems());
         }
-        clearCart(userId);
+        clearCart(email);
     }
 
 }

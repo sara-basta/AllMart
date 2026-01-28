@@ -5,10 +5,13 @@ import com.sara.allmart.dto.response.CartResponse;
 import com.sara.allmart.service.CartService;
 import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
-@RequestMapping("/api/cart")
+@RequestMapping("/api/carts")
 public class CartController {
     private final CartService cartService;
 
@@ -16,32 +19,37 @@ public class CartController {
         this.cartService = cartService;
     }
 
+    @PreAuthorize("hasAuthority('CUSTOMER')")
     @PostMapping
-    public ResponseEntity<CartResponse> addToCart(@Valid @RequestBody CartRequest request){
-        CartResponse response = cartService.addToCart(request.userId(), request.productId(), request.quantity());
+    public ResponseEntity<CartResponse> addToCart(@AuthenticationPrincipal UserDetails user,@Valid @RequestBody CartRequest request){
+        CartResponse response = cartService.addToCart(user.getUsername(),request.productId(), request.quantity());
         return ResponseEntity.ok(response);
     }
 
-    @DeleteMapping("/{userId}/items/{itemId}")
-    public ResponseEntity<CartResponse> removeFromCart(@PathVariable Long userId, @PathVariable Long itemId) {
-        CartResponse response = cartService.removeFromCart(userId, itemId);
+    @PreAuthorize("hasAuthority('CUSTOMER')")
+    @DeleteMapping("/my-cart/items/{itemId}")
+    public ResponseEntity<CartResponse> removeFromCart(@AuthenticationPrincipal UserDetails user, @PathVariable Long itemId) {
+        CartResponse response = cartService.removeFromCart(user.getUsername(), itemId);
         return ResponseEntity.ok(response);
     }
 
-    @PostMapping ("/{userId}/checkout")
-    public ResponseEntity<String> checkout(@PathVariable Long userId){
-        cartService.checkout(userId);
+    @PreAuthorize("hasAuthority('CUSTOMER')")
+    @PostMapping ("/my-cart/checkout")
+    public ResponseEntity<String> checkout(@AuthenticationPrincipal UserDetails user){
+        cartService.checkout(user.getUsername());
         return ResponseEntity.ok("Checkout successful");
     }
 
-    @GetMapping("/{userId}")
-    public ResponseEntity<CartResponse> getCart(@PathVariable Long userId){
-        return ResponseEntity.ok(cartService.getCart(userId));
+    @PreAuthorize("hasAuthority('CUSTOMER')")
+    @GetMapping("/my-cart")
+    public ResponseEntity<CartResponse> getCart(@AuthenticationPrincipal UserDetails user){
+        return ResponseEntity.ok(cartService.getCart(user.getUsername()));
     }
 
-    @PostMapping ("/{userId}")
-    public ResponseEntity<Void> clearCart(@PathVariable Long userId){
-        cartService.clearCart(userId);
+    @PreAuthorize("hasAuthority('CUSTOMER')")
+    @DeleteMapping ("/my-cart/clear")
+    public ResponseEntity<Void> clearCart(@AuthenticationPrincipal UserDetails user){
+        cartService.clearCart(user.getUsername());
         return ResponseEntity.noContent().build();
     }
     }

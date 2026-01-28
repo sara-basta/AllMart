@@ -1,5 +1,6 @@
 package com.sara.allmart.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
 import lombok.AllArgsConstructor;
@@ -33,6 +34,7 @@ public class Category extends BaseEntity{
     @NotBlank(message = "Description is required")
     private String description;
 
+    @JsonIgnore
     @OneToMany(mappedBy = "category",cascade = CascadeType.ALL,orphanRemoval = true)
     private List<Product> products = new ArrayList<>();
 }

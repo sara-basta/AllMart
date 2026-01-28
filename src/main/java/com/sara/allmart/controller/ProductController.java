@@ -16,6 +16,7 @@ import jakarta.validation.constraints.PositiveOrZero;
 import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
@@ -33,6 +34,7 @@ public class ProductController {
         this.productService = productService;
     }
 
+    @PreAuthorize("hasAuthority('ADMIN')")
     @Operation(summary = "Create a new product",
     description = "Adds a new product to the catalog. Requires a valid category ID.")
     @ApiResponses(value = {
@@ -43,7 +45,7 @@ public class ProductController {
     @PostMapping
     public ResponseEntity<ProductResponse> createProduct(@Valid @RequestBody ProductRequest request){
         ProductResponse response = productService.createProduct(request);
-        return new ResponseEntity<>(response,HttpStatus.CREATED);
+        return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 
     @GetMapping
@@ -59,12 +61,14 @@ public class ProductController {
         return ResponseEntity.ok(response);
     }
 
+    @PreAuthorize("hasAuthority('ADMIN')")
     @PatchMapping("/{id}/price")
     public ResponseEntity<ProductResponse> updatePrice(@PathVariable Long id, @Valid @RequestBody ProductPriceRequest request){
         ProductResponse response = productService.updatePrice(id, request.price());
         return ResponseEntity.ok(response);
     }
 
+    @PreAuthorize("hasAuthority('ADMIN')")
     @PatchMapping("/{id}/stock")
     public ResponseEntity<ProductResponse> updateStock(@PathVariable Long id,@Valid @RequestBody ProductStockRequest request){
         ProductResponse response = productService.updateStock(id, request.stock());
@@ -72,6 +76,7 @@ public class ProductController {
 
     }
 
+    @PreAuthorize("hasAuthority('ADMIN')")
     @PatchMapping("{id}/category")
     public ResponseEntity<ProductResponse> updateCategory(@PathVariable Long id, @Valid @RequestBody ProductCategoryRequest request){
         ProductResponse response = productService.updateCategory(id, request);

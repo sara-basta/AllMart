@@ -1,5 +1,6 @@
 package com.sara.allmart.service;
 
+import com.sara.allmart.dto.request.OrderRequest;
 import com.sara.allmart.dto.response.OrderResponse;
 import com.sara.allmart.entity.*;
 import com.sara.allmart.exception.ResourceNotFoundException;
@@ -32,15 +33,14 @@ public class OrderService {
     }
 
     @Transactional // so that if saving fails, stock goes back to normal (doesn't get decremented)
-    public OrderResponse createOrder (Long userId, Long productId){
-        log.info("Attempting to create order for User ID: {}", userId);
-        User user = userRepository.findById(userId)
-                .orElseThrow(() -> new ResourceNotFoundException("User not found"));
-        Product product = productRepository.findById(productId)
+    public OrderResponse createOrder (String email, OrderRequest request){
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+        Product product = productRepository.findById(request.productId())
                 .orElseThrow(() -> new ResourceNotFoundException("Product not found"));
 
         if(product.getStockQuantity()<1){
-            log.warn("Order failed: Product ID {} is out of stock", productId);
+            log.warn("Order failed: Product ID {} is out of stock", request.productId());
             throw new RuntimeException("Not in stock!");
         }
 
@@ -100,8 +100,8 @@ public class OrderService {
     }
 
     @Transactional
-    public void createOrderFromCart(Long userId, List<CartItem> items) {
-        User user = userRepository.findById(userId)
+    public void createOrderFromCart(String email, List<CartItem> items) {
+        User user = userRepository.findByEmail(email)
                 .orElseThrow(() -> new ResourceNotFoundException("User not found"));
 
         Order order = new Order();
@@ -139,5 +139,16 @@ public class OrderService {
         order.setTotalAmount(totalOrderAmount);
 
         orderRepository.save(order);
+    }
+
+    public List<OrderResponse> getOrdersByEmail(String email) {
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+
+        List<Order> orders = orderRepository.findByUser(user);
+
+        return orders.stream()
+                .map(orderMapper::toResponse)
+                .toList();
     }
 }
