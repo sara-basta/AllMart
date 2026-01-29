@@ -1,6 +1,7 @@
 package com.sara.allmart.service;
 
 import com.sara.allmart.dto.request.AddressRequest;
+import com.sara.allmart.dto.request.UpdateProfileRequest;
 import com.sara.allmart.dto.request.UserRequest;
 import com.sara.allmart.dto.response.UserResponse;
 import com.sara.allmart.entity.SavedAddress;
@@ -9,6 +10,9 @@ import com.sara.allmart.exception.ResourceNotFoundException;
 import com.sara.allmart.mapper.UserMapper;
 import com.sara.allmart.repository.SavedAddressRepository;
 import com.sara.allmart.repository.UserRepository;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -31,12 +35,6 @@ public class UserService {
         User user = userMapper.toEntity(request);
         userRepository.save(user);
         return userMapper.toResponse(user);
-    }
-
-    public UserResponse getUser(Long id) {
-        return userRepository.findById(id)
-                .map(userMapper::toResponse)
-                .orElseThrow(() -> new ResourceNotFoundException("User not found!"));
     }
 
     public SavedAddress addAddress(String email, AddressRequest request){
@@ -64,5 +62,31 @@ public class UserService {
             throw new RuntimeException("Access Denied: You cannot delete an address that isn't yours!");
         }
         savedAddressRepository.delete(address);
+    }
+
+    public Page<UserResponse> getUsers(Long id, int page, int size) {
+        Pageable pageable = PageRequest.of(page,size);
+        return userRepository.searchUsers(id,pageable)
+                .map(userMapper::toResponse);
+    }
+
+    public UserResponse getProfile(String email) {
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new ResourceNotFoundException("User not found!"));
+        return userMapper.toResponse(user);
+    }
+
+    public UserResponse updateProfile(String email, UpdateProfileRequest request) {
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new ResourceNotFoundException("User not found!"));
+
+        if(request.firstName()!=null && !request.firstName().isBlank()){
+            user.setFirstName(request.firstName());
+        }
+        if(request.lastName()!=null && !request.lastName().isBlank()){
+            user.setLastName(request.lastName());
+        }
+       userRepository.save(user);
+        return userMapper.toResponse(user);
     }
 }
