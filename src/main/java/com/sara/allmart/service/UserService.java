@@ -3,10 +3,12 @@ package com.sara.allmart.service;
 import com.sara.allmart.dto.request.AddressRequest;
 import com.sara.allmart.dto.request.UpdateProfileRequest;
 import com.sara.allmart.dto.request.UserRequest;
+import com.sara.allmart.dto.response.AddressResponse;
 import com.sara.allmart.dto.response.UserResponse;
 import com.sara.allmart.entity.SavedAddress;
 import com.sara.allmart.entity.User;
 import com.sara.allmart.exception.ResourceNotFoundException;
+import com.sara.allmart.mapper.AddressMapper;
 import com.sara.allmart.mapper.UserMapper;
 import com.sara.allmart.repository.SavedAddressRepository;
 import com.sara.allmart.repository.UserRepository;
@@ -23,12 +25,14 @@ public class UserService {
     private final UserRepository userRepository;
     private final UserMapper userMapper;
     private final SavedAddressRepository savedAddressRepository;
+    private final AddressMapper addressMapper;
 
 
-    public UserService(UserRepository userRepository, UserMapper userMapper, SavedAddressRepository savedAddressRepository) {
+    public UserService(UserRepository userRepository, UserMapper userMapper, SavedAddressRepository savedAddressRepository, AddressMapper addressMapper) {
         this.userRepository = userRepository;
         this.userMapper = userMapper;
         this.savedAddressRepository = savedAddressRepository;
+        this.addressMapper = addressMapper;
     }
 
     public UserResponse createUser(UserRequest request) {
@@ -37,7 +41,7 @@ public class UserService {
         return userMapper.toResponse(user);
     }
 
-    public SavedAddress addAddress(String email, AddressRequest request){
+    public AddressResponse addAddress(String email, AddressRequest request){
         User user = userRepository.findByEmail(email)
                 .orElseThrow(() -> new ResourceNotFoundException("User not found!"));
 
@@ -46,13 +50,14 @@ public class UserService {
         newAddress.setStreet(request.street());
         newAddress.setZipCode(request.zipCode());
         newAddress.setUser(user);
-        return savedAddressRepository.save(newAddress);
+        return addressMapper.toResponse(savedAddressRepository.save(newAddress));
     }
 
-    public List<SavedAddress> getAllAddresses(String email){
+    public List<AddressResponse> getAllAddresses(String email){
         User user = userRepository.findByEmail(email)
                 .orElseThrow(() -> new ResourceNotFoundException("User not found!"));
-        return savedAddressRepository.findByUser(user);
+        return savedAddressRepository.findByUser(user)
+                .stream().map(addressMapper::toResponse).toList();
     }
 
     public void deleteAddress(String email, Long addressId){

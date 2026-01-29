@@ -3,6 +3,7 @@ package com.sara.allmart.controller;
 import com.sara.allmart.dto.request.AddressRequest;
 import com.sara.allmart.dto.request.UpdateProfileRequest;
 import com.sara.allmart.dto.request.UserRequest;
+import com.sara.allmart.dto.response.AddressResponse;
 import com.sara.allmart.dto.response.UserResponse;
 import com.sara.allmart.entity.SavedAddress;
 import com.sara.allmart.service.UserService;
@@ -38,15 +39,15 @@ public class UserController {
 
     @PreAuthorize("hasAuthority('CUSTOMER')")
     @PostMapping("/profile/addresses")
-    public ResponseEntity<SavedAddress> addAddress(@AuthenticationPrincipal UserDetails user, @Valid @RequestBody AddressRequest request) {
-        SavedAddress response = userService.addAddress(user.getUsername(), request);
+    public ResponseEntity<AddressResponse> addAddress(@AuthenticationPrincipal UserDetails user, @Valid @RequestBody AddressRequest request) {
+        AddressResponse response = userService.addAddress(user.getUsername(), request);
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 
     @PreAuthorize("hasAuthority('CUSTOMER')")
     @GetMapping("/profile/addresses")
-    public ResponseEntity<List<SavedAddress>> getAllAddresses(@AuthenticationPrincipal UserDetails user) {
-        List<SavedAddress> response = userService.getAllAddresses(user.getUsername());
+    public ResponseEntity<List<AddressResponse>> getAllAddresses(@AuthenticationPrincipal UserDetails user) {
+        List<AddressResponse> response = userService.getAllAddresses(user.getUsername());
         return ResponseEntity.ok(response);
     }
 
