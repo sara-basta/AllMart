@@ -66,9 +66,20 @@ public class ProductService {
         return productMapper.toResponse(product);
     }
 
-    public Page<ProductResponse> searchProducts(String name, Long categoryId, BigDecimal minPrice, BigDecimal maxPrice, int page, int size) {
+    public Page<ProductResponse> searchProducts(String name, Long categoryId, BigDecimal minPrice, BigDecimal maxPrice,boolean isDeleted, int page, int size) {
         Pageable pageable = PageRequest.of(page, size);
-        Page<Product> productPage = productRepository.searchProducts(name, categoryId, minPrice, maxPrice, pageable);
+
+        Page<Product> productPage = productRepository.searchProducts(name, categoryId, minPrice, maxPrice,isDeleted, pageable);
         return productPage.map(productMapper::toResponse);
+    }
+
+    // soft-delete
+    public ProductResponse deleteProduct(Long id) {
+        Product product = productRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Product not found!"));
+
+        product.setDeleted(true);
+        product.setStockQuantity(0);
+        return productMapper.toResponse(productRepository.save(product));
     }
 }

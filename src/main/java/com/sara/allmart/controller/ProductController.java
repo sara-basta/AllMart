@@ -57,7 +57,22 @@ public class ProductController {
             @RequestParam(defaultValue = "0") @Min(0) int page,
             @RequestParam(defaultValue = "20") int size
     ) {
-        Page<ProductResponse> response = productService.searchProducts(name, categoryId, minPrice, maxPrice, page, size);
+        Page<ProductResponse> response = productService.searchProducts(name, categoryId, minPrice, maxPrice,false, page, size);
+        return ResponseEntity.ok(response);
+    }
+
+    @PreAuthorize("hasAuthority('ADMIN')")
+    @GetMapping("/admin")
+    public ResponseEntity<Page<ProductResponse>> searchProductsAdmin(
+            @RequestParam(required = false) String name,
+            @RequestParam(required = false) Long categoryId,
+            @RequestParam(required = false) @PositiveOrZero BigDecimal minPrice,
+            @RequestParam(required = false) BigDecimal maxPrice,
+            @RequestParam(defaultValue = "0") @Min(0) int page,
+            @RequestParam(defaultValue = "true") boolean includeDeleted,
+            @RequestParam(defaultValue = "20") int size
+    ) {
+        Page<ProductResponse> response = productService.searchProducts(name, categoryId, minPrice, maxPrice,includeDeleted, page, size);
         return ResponseEntity.ok(response);
     }
 
@@ -77,12 +92,17 @@ public class ProductController {
     }
 
     @PreAuthorize("hasAuthority('ADMIN')")
-    @PatchMapping("{id}/category")
+    @PatchMapping("/{id}/category")
     public ResponseEntity<ProductResponse> updateCategory(@PathVariable Long id, @Valid @RequestBody ProductCategoryRequest request){
         ProductResponse response = productService.updateCategory(id, request);
         return ResponseEntity.ok(response);
 
     }
 
-    //TODO: add delete product
+    @PreAuthorize("hasAuthority('ADMIN')")
+    @DeleteMapping("/{id}")
+    public ResponseEntity<ProductResponse> deleteProduct(@PathVariable Long id){
+        ProductResponse response = productService.deleteProduct(id);
+        return ResponseEntity.ok(response);
+    }
 }

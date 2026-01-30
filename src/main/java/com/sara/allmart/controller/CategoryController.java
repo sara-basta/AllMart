@@ -1,6 +1,7 @@
 package com.sara.allmart.controller;
 
 import com.sara.allmart.dto.request.CategoryRequest;
+import com.sara.allmart.dto.request.UpdateCategoryRequest;
 import com.sara.allmart.dto.response.CategoryResponse;
 import com.sara.allmart.service.CategoryService;
 import jakarta.validation.Valid;
@@ -31,9 +32,11 @@ public class CategoryController {
     }
 
     @GetMapping
-    public ResponseEntity<Page<CategoryResponse>> getAllCategories(@RequestParam(defaultValue = "0") @Min(0) int page,
-                                                   @RequestParam(defaultValue = "20") int size){
-        return ResponseEntity.ok(categoryService.getAllCategories(page,size));
+    public ResponseEntity<Page<CategoryResponse>> getAllCategories(
+            @RequestParam(required = false) Long id,
+            @RequestParam(defaultValue = "0") @Min(0) int page,
+            @RequestParam(defaultValue = "20") int size){
+        return ResponseEntity.ok(categoryService.getAllCategories(id,page,size));
     }
 
     @PreAuthorize("hasAuthority('ADMIN')")
@@ -43,5 +46,10 @@ public class CategoryController {
         return ResponseEntity.noContent().build();
     }
 
-    // TODO: update category and get category by id
+    @PreAuthorize("hasAuthority('ADMIN')")
+    @PatchMapping("/{categoryId}")
+    public ResponseEntity<CategoryResponse> updateCategory(@PathVariable Long categoryId, @RequestBody UpdateCategoryRequest request){
+        CategoryResponse response = categoryService.updateCategory(categoryId, request);
+        return ResponseEntity.ok(response);
+    }
 }

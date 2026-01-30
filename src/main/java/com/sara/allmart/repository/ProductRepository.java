@@ -16,14 +16,15 @@ public interface ProductRepository extends JpaRepository<Product,Long> {
             "(:name IS NULL OR CAST(p.name AS TEXT) ILIKE CAST('%' || :name || '%' AS TEXT)) AND " +
             "(:categoryId IS NULL OR p.category_id = :categoryId) AND " +
             "(:minPrice IS NULL OR p.price >= :minPrice) AND " +
-            "(:maxPrice IS NULL OR p.price <= :maxPrice)",
+            "(:maxPrice IS NULL OR p.price <= :maxPrice) AND "+
+            "(:includeDeleted = TRUE OR p.is_deleted = FALSE)",
             nativeQuery = true)
     Page<Product> searchProducts(
             @Param("name") String name,
             @Param("categoryId") Long categoryId,
             @Param("minPrice") BigDecimal minPrice,
             @Param("maxPrice") BigDecimal maxPrice,
+            @Param("includeDeleted") boolean includeDeleted,
             Pageable pageable
     );
-
 }
