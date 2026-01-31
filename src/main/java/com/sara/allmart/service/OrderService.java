@@ -103,11 +103,14 @@ public class OrderService {
                 .toList();
     }
 
+    @Transactional
     public OrderResponse updateStatus(Long id, OrderStatus newStatus) {
         Order order = orderRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Order not found !"));
+        if(order.getStatus().equals(OrderStatus.DELIVERED)){
+            throw new IllegalStateException("You cannot change a delivered order's status !");
+        }
         order.setStatus(newStatus);
-        orderRepository.save(order);
         return orderMapper.toResponse(order);
     }
 
@@ -126,11 +129,6 @@ public class OrderService {
         if (!savedAddress.getUser().getEmail().equals(email)) {
             throw new RuntimeException("Access Denied: You cannot use an address that isn't yours!");
         }
-        Address shippingAddress = new Address(
-                savedAddress.getStreet(),
-                savedAddress.getCity(),
-                Integer.parseInt(savedAddress.getZipCode())
-        );
         List<OrderItem> orderItems = new ArrayList<>();
         BigDecimal totalOrderAmount = BigDecimal.ZERO;
 
@@ -161,7 +159,7 @@ public class OrderService {
         orderRepository.save(order);
     }
 
-    public List<OrderResponse> getOrdersByEmail(String email) {
+    public List<OrderResponse> getOrdersHistory(String email) {
         User user = userRepository.findByEmail(email)
                 .orElseThrow(() -> new RuntimeException("User not found"));
 
@@ -170,5 +168,35 @@ public class OrderService {
         return orders.stream()
                 .map(orderMapper::toResponse)
                 .toList();
+    }
+
+    @Transactional
+    public OrderResponse cancelOrder(String email, Long id) {
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+        Order order = orderRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Order not found"));
+
+        if (!order.getUser().getId().equals(user.getId())) {
+            throw new RuntimeException("You are not allowed to cancel this order");
+        }
+
+        if (order.getStatus() != OrderStatus.PENDING) {
+            throw new IllegalStateException("Order cannot be cancelled");
+        }
+
+        List<OrderItem> items = order.getItems();
+
+        for(OrderItem item : items){
+            Integer quantity = item.getQuantity();
+            Long itemId = item.getProduct().getId();
+
+            Product product = productRepository.findById(itemId)
+                    .orElseThrow(() -> new ResourceNotFoundException("Product not found"));
+            product.setStockQuantity(product.getStockQuantity()+quantity);
+        }
+        order.setStatus(OrderStatus.CANCELLED);
+
+        return orderMapper.toResponse(order);
     }
 }

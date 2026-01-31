@@ -9,7 +9,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 
@@ -54,9 +53,14 @@ public class OrderController {
 
     @PreAuthorize("hasAuthority('CUSTOMER')")
     @GetMapping("/my-orders")
-    public ResponseEntity<List<OrderResponse>> getOrdersByEmail(@AuthenticationPrincipal UserDetails user){
-        return ResponseEntity.ok(orderService.getOrdersByEmail(user.getUsername()));
+    public ResponseEntity<List<OrderResponse>> getOrdersHistory(@AuthenticationPrincipal UserDetails user){
+        return ResponseEntity.ok(orderService.getOrdersHistory(user.getUsername()));
     }
 
-    //TODO: add cancel order
+    @PreAuthorize("hasAuthority('CUSTOMER')")
+    @PostMapping("{id}/cancel")
+    public ResponseEntity<OrderResponse> cancelOrder(@AuthenticationPrincipal UserDetails user,@PathVariable Long id){
+        OrderResponse response = orderService.cancelOrder(user.getUsername(),id);
+        return ResponseEntity.ok(response);
+    }
 }
