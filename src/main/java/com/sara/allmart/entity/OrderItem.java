@@ -45,7 +45,8 @@ public class OrderItem {
     private Product product;
 
     @NotNull
-    @Min(value = 1, message = "Quantity must be at least 1")    private Integer quantity;
+    @Min(value = 1, message = "Quantity must be at least 1")
+    private Integer quantity;
 
     @NotNull
     @Positive
