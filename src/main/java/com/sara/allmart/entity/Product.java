@@ -46,4 +46,7 @@ public class Product extends BaseEntity{
 
     @Column(name = "is_deleted")
     private boolean deleted = false;
+
+    private Double averageRating = 0.0;
+    private Integer reviewCount = 0;
 }
