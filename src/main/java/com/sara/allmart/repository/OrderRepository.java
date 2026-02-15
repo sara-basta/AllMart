@@ -13,7 +13,7 @@ import java.util.List;
 public interface OrderRepository extends JpaRepository<Order,Long> {
     List<Order> findOrdersByUser(User user);
 
-    List<Order> findByUser(User user);
+    List<Order> findByUserOrderByCreatedAtDesc(User user);
 
     @Query("SELECT COUNT(o) > 0 FROM Order o JOIN o.items i " +
             "WHERE o.user = :user " +

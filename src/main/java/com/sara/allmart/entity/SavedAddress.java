@@ -15,7 +15,15 @@ import lombok.Setter;
 @AllArgsConstructor
 public class SavedAddress {
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @SequenceGenerator(
+            name = "saved_address_id_seq",
+            sequenceName = "saved_address_id_seq",
+            allocationSize = 1
+    )
+    @GeneratedValue(
+            strategy = GenerationType.SEQUENCE,
+            generator = "saved_address_id_seq"
+    )
     private Long id;
 
     private String street;

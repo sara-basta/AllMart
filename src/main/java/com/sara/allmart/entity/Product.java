@@ -20,7 +20,7 @@ public class Product extends BaseEntity{
     @SequenceGenerator(
             name = "product_id_seq",
             sequenceName = "product_id_seq",
-            allocationSize = 10
+            allocationSize = 1
     )
     @GeneratedValue(
             strategy = GenerationType.SEQUENCE,

@@ -15,5 +15,5 @@ public class Address {
     @NotBlank(message = "City is required")
     private String city;
     @NotBlank(message = "Zip code is required")
-    private Integer zipCode;
+    private String zipCode;
 }

@@ -15,7 +15,15 @@ import lombok.Setter;
 @AllArgsConstructor
 public class Wishlist extends BaseEntity{
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @SequenceGenerator(
+            name = "wishlist_id_seq",
+            sequenceName = "wishlist_id_seq",
+            allocationSize = 1
+    )
+    @GeneratedValue(
+            strategy = GenerationType.SEQUENCE,
+            generator = "wishlist_id_seq"
+    )
     private Long id;
 
     @ManyToOne(fetch = FetchType.LAZY)

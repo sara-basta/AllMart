@@ -45,12 +45,8 @@ public class ReviewService {
         if(reviewRepository.existsByUserAndProduct_Id(user,productId)){
             throw new IllegalStateException("You already reviewed this product.");
         }
-//        int oldCount = product.getReviewCount();
-//        double oldAverage = product.getAverageRating();
-
-        // checking for null for older products that didn't have the rating and review columns
-        int oldCount = (product.getReviewCount() != null) ? product.getReviewCount() : 0;
-        double oldAverage = (product.getAverageRating() != null) ? product.getAverageRating() : 0.0;
+        int oldCount = product.getReviewCount();
+        double oldAverage = product.getAverageRating();
 
         double newAverage = ((oldAverage * oldCount) + request.rating()) / (oldCount + 1);
 

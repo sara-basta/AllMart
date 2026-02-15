@@ -23,7 +23,7 @@ public class User extends BaseEntity implements UserDetails {
     @SequenceGenerator(
             name = "user_id_seq",
             sequenceName = "user_id_seq",
-            allocationSize = 10
+            allocationSize = 1
     )
     @GeneratedValue(
             strategy = GenerationType.SEQUENCE,

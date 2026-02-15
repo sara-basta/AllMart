@@ -72,7 +72,7 @@ public class OrderService {
         Address shippingAddress = new Address(
                 savedAddress.getStreet(),
                 savedAddress.getCity(),
-                Integer.parseInt(savedAddress.getZipCode())
+                savedAddress.getZipCode()
         );
         order.setShippingAddress(shippingAddress);
         order.setUser(user);
@@ -129,6 +129,14 @@ public class OrderService {
         if (!savedAddress.getUser().getEmail().equals(email)) {
             throw new RuntimeException("Access Denied: You cannot use an address that isn't yours!");
         }
+
+        Address shippingAddress = new Address(
+                savedAddress.getStreet(),
+                savedAddress.getCity(),
+                savedAddress.getZipCode()
+        );
+        order.setShippingAddress(shippingAddress);
+
         List<OrderItem> orderItems = new ArrayList<>();
         BigDecimal totalOrderAmount = BigDecimal.ZERO;
 
@@ -163,7 +171,7 @@ public class OrderService {
         User user = userRepository.findByEmail(email)
                 .orElseThrow(() -> new RuntimeException("User not found"));
 
-        List<Order> orders = orderRepository.findByUser(user);
+        List<Order> orders = orderRepository.findByUserOrderByCreatedAtDesc(user);
 
         return orders.stream()
                 .map(orderMapper::toResponse)

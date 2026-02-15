@@ -71,7 +71,7 @@ public class DataSeeder implements CommandLineRunner {
         order.setStatus(OrderStatus.PENDING);
         order.setTotalAmount(new BigDecimal("40000"));
 
-        Address address = new Address("Hay Riad", "Rabat", 10100);
+        Address address = new Address("Hay Riad", "Rabat", "10100");
         order.setShippingAddress(address);
 
         OrderItem orderItem = new OrderItem();

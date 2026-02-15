@@ -23,7 +23,7 @@ public class CartItem {
     @SequenceGenerator(
             name = "cart_item_id_seq",
             sequenceName = "cart_item_id_seq",
-            allocationSize = 10
+            allocationSize = 1
     )
     @GeneratedValue(
             strategy = GenerationType.SEQUENCE,

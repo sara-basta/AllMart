@@ -22,7 +22,7 @@ public class Category extends BaseEntity{
     @SequenceGenerator(
             name = "category_id_seq",
             sequenceName = "category_id_seq",
-            allocationSize = 10
+            allocationSize = 1
     )
     @GeneratedValue(
             strategy = GenerationType.SEQUENCE,
