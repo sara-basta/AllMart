@@ -32,7 +32,7 @@ To run this project locally, you will need:
 
 1.  **Clone the repository:**
     ```bash
-    git clone [https://github.com/sara-basta/AllMart.git](https://github.com/sara-basta/AllMart.git)
+    git clone https://github.com/sara-basta/AllMart.git
     cd AllMart
     ```
 
@@ -55,9 +55,8 @@ To run this project locally, you will need:
     ```
 
 3.  **Run the application:**
-    ```bash
-    mvn spring-boot:run
-    ```
+   
+Go to the main class `AllmartApplication.java` (in `src/main/java/com/sara/allmart`), and click the green **"Run"** button.
 
 ## 📖 API Reference
 
