@@ -29,6 +29,8 @@ public record ProductRequest(
 
         @Schema(description = "ID of the category this product belongs to", example = "1")
         @NotNull(message = "Category is required")
-        Long categoryId
+        Long categoryId,
+
+        String imageUrl
 ) {
 }

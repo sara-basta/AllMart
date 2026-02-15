@@ -24,6 +24,7 @@ public class ProductMapper {
         product.setDescription(request.description());
         product.setPrice(request.price());
         product.setStockQuantity(request.stockQuantity());
+        product.setImageUrl(request.imageUrl());
         Category category = categoryRepository.findById(request.categoryId())
                 .orElseThrow(() -> new ResourceNotFoundException("Category not found"));
 
@@ -39,9 +40,10 @@ public class ProductMapper {
         BigDecimal price = product.getPrice();
         Integer stock = product.getStockQuantity();
         String categoryName = "Uncategorized";
+        String imageUrl = product.getImageUrl();
         if(product.getCategory() != null) {
         categoryName = product.getCategory().getName();
         }
-        return new ProductResponse(id,name,description,price,stock,categoryName);
+        return new ProductResponse(id,name,description,price,stock,categoryName,imageUrl);
     }
 }

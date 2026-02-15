@@ -29,7 +29,6 @@ public class ProductService {
         this.categoryRepository = categoryRepository;
     }
 
-    @PreAuthorize("hasAuthority('ADMIN')")
     public ProductResponse createProduct(ProductRequest request) {
         Product product = productMapper.toEntity(request);
         productRepository.save(product);
@@ -37,7 +36,6 @@ public class ProductService {
         return productMapper.toResponse(product);
     }
 
-    @PreAuthorize("hasAuthority('ADMIN')")
     public ProductResponse updatePrice(Long id, BigDecimal newPrice) {
         Product product = productRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Product not found!"));
@@ -46,7 +44,6 @@ public class ProductService {
         return productMapper.toResponse(product);
     }
 
-    @PreAuthorize("hasAuthority('ADMIN')")
     public ProductResponse updateStock(Long id, Integer newStock) {
         Product product = productRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Product not found!"));
@@ -55,7 +52,6 @@ public class ProductService {
         return productMapper.toResponse(product);
     }
 
-    @PreAuthorize("hasAuthority('ADMIN')")
     public ProductResponse updateCategory(Long id, ProductCategoryRequest request) {
         Product product = productRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Product not found!"));
