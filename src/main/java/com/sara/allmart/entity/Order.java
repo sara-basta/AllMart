@@ -51,4 +51,9 @@ public class Order extends BaseEntity{
     @NotNull
     @PositiveOrZero
     private BigDecimal totalAmount;
+
+    private boolean isPaid;
+
+    @Enumerated(EnumType.STRING)
+    private PaymentMethod paymentMethod;
 }
