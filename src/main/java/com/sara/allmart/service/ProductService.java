@@ -78,4 +78,10 @@ public class ProductService {
         product.setStockQuantity(0);
         return productMapper.toResponse(productRepository.save(product));
     }
+
+    public ProductResponse getProductById(Long id) {
+        Product product = productRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Product not found!"));
+        return productMapper.toResponse(product);
+    }
 }
