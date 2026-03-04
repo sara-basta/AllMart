@@ -44,6 +44,8 @@ public class ProductMapper {
         if(product.getCategory() != null) {
         categoryName = product.getCategory().getName();
         }
-        return new ProductResponse(id,name,description,price,stock,categoryName,imageUrl);
+        Double averageRating = product.getAverageRating();
+        Integer reviewCount = product.getReviewCount();
+        return new ProductResponse(id,name,description,price,stock,categoryName,imageUrl,averageRating,reviewCount);
     }
 }

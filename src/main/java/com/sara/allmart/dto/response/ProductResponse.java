@@ -9,6 +9,8 @@ public record ProductResponse(
         BigDecimal price,
         Integer stockQuantity,
         String categoryName,
-        String imageUrl
+        String imageUrl,
+        Double averageRating,
+        Integer reviewCount
 ){
 }

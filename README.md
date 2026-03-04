@@ -24,7 +24,7 @@ A backend REST API built with Spring Boot for an e-commerce platform. This proje
 ## ⚙️ Prerequisites
 
 To run this project locally, you will need:
-* Java 17 or higher
+* Java 21 or higher
 * PostgreSQL installed and running
 * A Cloudinary account (for image uploads)
 
