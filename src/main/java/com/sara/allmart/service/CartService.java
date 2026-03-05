@@ -8,7 +8,6 @@ import com.sara.allmart.entity.Product;
 import com.sara.allmart.entity.User;
 import com.sara.allmart.exception.ResourceNotFoundException;
 import com.sara.allmart.mapper.CartMapper;
-import com.sara.allmart.repository.CartItemRepository;
 import com.sara.allmart.repository.CartRepository;
 import com.sara.allmart.repository.ProductRepository;
 import com.sara.allmart.repository.UserRepository;
@@ -28,15 +27,13 @@ public class CartService {
     private final ProductRepository productRepository;
     private final OrderService orderService;
     private final CartMapper cartMapper;
-    private final CartItemRepository cartItemRepository;
 
-    public CartService(CartRepository cartRepository, UserRepository userRepository, ProductRepository productRepository, OrderService orderService, CartMapper cartMapper, CartItemRepository cartItemRepository) {
+    public CartService(CartRepository cartRepository, UserRepository userRepository, ProductRepository productRepository, OrderService orderService, CartMapper cartMapper) {
         this.cartRepository = cartRepository;
         this.userRepository = userRepository;
         this.productRepository = productRepository;
         this.orderService = orderService;
         this.cartMapper = cartMapper;
-        this.cartItemRepository = cartItemRepository;
     }
 
     private Cart getCartEntity(String email) {
@@ -113,9 +110,10 @@ public class CartService {
         clearCart(email);
     }
 
+    @Transactional
     public CartResponse syncCart(String email, @Valid List<CartRequest> items) {
         // delete old items
-        cartItemRepository.deleteByCartUserEmail(email);
+        this.clearCart(email);
 
         // add the new ones from guest cart to user cart
         for (CartRequest item : items) {
