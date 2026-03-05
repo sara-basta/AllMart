@@ -8,10 +8,14 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @RestController
 @RequestMapping("/api/carts")
+@Validated
 public class CartController {
     private final CartService cartService;
 
@@ -51,5 +55,13 @@ public class CartController {
     public ResponseEntity<Void> clearCart(@AuthenticationPrincipal UserDetails user){
         cartService.clearCart(user.getUsername());
         return ResponseEntity.noContent().build();
+    }
+
+    @PreAuthorize("hasAuthority('CUSTOMER')")
+    @PostMapping("/sync")
+    public ResponseEntity<CartResponse> syncCart(@AuthenticationPrincipal UserDetails user,
+            @Valid @RequestBody List<CartRequest> items) {
+        CartResponse response = cartService.syncCart(user.getUsername(), items);
+        return ResponseEntity.ok(response);
     }
     }

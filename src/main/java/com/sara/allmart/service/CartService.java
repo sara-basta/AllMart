@@ -1,5 +1,6 @@
 package com.sara.allmart.service;
 
+import com.sara.allmart.dto.request.CartRequest;
 import com.sara.allmart.dto.response.CartResponse;
 import com.sara.allmart.entity.Cart;
 import com.sara.allmart.entity.CartItem;
@@ -7,13 +8,16 @@ import com.sara.allmart.entity.Product;
 import com.sara.allmart.entity.User;
 import com.sara.allmart.exception.ResourceNotFoundException;
 import com.sara.allmart.mapper.CartMapper;
+import com.sara.allmart.repository.CartItemRepository;
 import com.sara.allmart.repository.CartRepository;
 import com.sara.allmart.repository.ProductRepository;
 import com.sara.allmart.repository.UserRepository;
 import jakarta.transaction.Transactional;
+import jakarta.validation.Valid;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
+import java.util.List;
 import java.util.Optional;
 
 @Transactional
@@ -24,13 +28,15 @@ public class CartService {
     private final ProductRepository productRepository;
     private final OrderService orderService;
     private final CartMapper cartMapper;
+    private final CartItemRepository cartItemRepository;
 
-    public CartService(CartRepository cartRepository, UserRepository userRepository, ProductRepository productRepository, OrderService orderService, CartMapper cartMapper) {
+    public CartService(CartRepository cartRepository, UserRepository userRepository, ProductRepository productRepository, OrderService orderService, CartMapper cartMapper, CartItemRepository cartItemRepository) {
         this.cartRepository = cartRepository;
         this.userRepository = userRepository;
         this.productRepository = productRepository;
         this.orderService = orderService;
         this.cartMapper = cartMapper;
+        this.cartItemRepository = cartItemRepository;
     }
 
     private Cart getCartEntity(String email) {
@@ -107,4 +113,15 @@ public class CartService {
         clearCart(email);
     }
 
+    public CartResponse syncCart(String email, @Valid List<CartRequest> items) {
+        // delete old items
+        cartItemRepository.deleteByCartUserEmail(email);
+
+        // add the new ones from guest cart to user cart
+        for (CartRequest item : items) {
+            this.addToCart(email, item.productId(), item.quantity());
+        }
+
+        return this.getCart(email);
+    }
 }
