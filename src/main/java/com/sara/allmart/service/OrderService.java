@@ -115,7 +115,7 @@ public class OrderService {
     }
 
     @Transactional
-    public void createOrderFromCart(String email, List<CartItem> items,Long addressId) {
+    public Long createOrderFromCart(String email, List<CartItem> items,Long addressId) {
         User user = userRepository.findByEmail(email)
                 .orElseThrow(() -> new ResourceNotFoundException("User not found"));
 
@@ -164,7 +164,8 @@ public class OrderService {
         order.setItems(orderItems);
         order.setTotalAmount(totalOrderAmount);
 
-        orderRepository.save(order);
+        Order savedOrder = orderRepository.save(order);
+        return savedOrder.getId();
     }
 
     public List<OrderResponse> getOrdersHistory(String email) {

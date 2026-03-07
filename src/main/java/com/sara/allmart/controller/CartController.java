@@ -39,9 +39,9 @@ public class CartController {
 
     @PreAuthorize("hasAuthority('CUSTOMER')")
     @PostMapping ("/my-cart/checkout")
-    public ResponseEntity<String> checkout(@AuthenticationPrincipal UserDetails user,@RequestParam Long addressId){
-        cartService.checkout(user.getUsername(),addressId);
-        return ResponseEntity.ok("Checkout successful");
+    public ResponseEntity<Long> checkout(@AuthenticationPrincipal UserDetails user,@RequestParam Long addressId){
+        Long orderId = cartService.checkout(user.getUsername(), addressId);
+        return ResponseEntity.ok(orderId);
     }
 
     @PreAuthorize("hasAuthority('CUSTOMER')")

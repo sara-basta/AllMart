@@ -102,12 +102,17 @@ public class CartService {
         cartRepository.save(cart);
     }
 
-    public void checkout(String email,Long addressId) {
+    public Long checkout(String email,Long addressId) {
         Cart cart = getCartEntity(email);
-        if(!cart.getItems().isEmpty()){
-            orderService.createOrderFromCart(email,cart.getItems(),addressId);
+        if (cart.getItems().isEmpty()) {
+            throw new RuntimeException("Cannot checkout an empty cart.");
         }
+
+        Long orderId = orderService.createOrderFromCart(email, cart.getItems(), addressId);
+
         clearCart(email);
+
+        return orderId;
     }
 
     @Transactional
