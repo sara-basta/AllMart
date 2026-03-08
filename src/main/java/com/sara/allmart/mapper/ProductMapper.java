@@ -41,9 +41,11 @@ public class ProductMapper {
         Integer stock = product.getStockQuantity();
         String categoryName = "Uncategorized";
         String imageUrl = product.getImageUrl();
+        int reviewCount = product.getReviewCount();
+        double averageRating = product.getAverageRating();
         if(product.getCategory() != null) {
         categoryName = product.getCategory().getName();
         }
-        return new ProductResponse(id,name,description,price,stock,categoryName,imageUrl);
+        return new ProductResponse(id,name,description,price,stock,categoryName,imageUrl,reviewCount,averageRating);
     }
 }

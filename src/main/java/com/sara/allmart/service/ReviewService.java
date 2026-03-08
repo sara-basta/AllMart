@@ -2,6 +2,7 @@ package com.sara.allmart.service;
 
 import com.sara.allmart.dto.request.ReviewRequest;
 import com.sara.allmart.dto.response.ReviewResponse;
+import com.sara.allmart.entity.OrderStatus;
 import com.sara.allmart.entity.Product;
 import com.sara.allmart.entity.Review;
 import com.sara.allmart.entity.User;
@@ -39,12 +40,17 @@ public class ReviewService {
                 .orElseThrow(() -> new ResourceNotFoundException("User not found!"));
         Product product = productRepository.findById(productId)
                 .orElseThrow(() -> new ResourceNotFoundException("Product not found!"));
-        if(!orderRepository.hasUserPurchasedProduct(user,productId)){
-            throw new IllegalStateException("You haven't purchased this product.");
+
+        long deliveredCount = orderRepository.countDeliveredProductForUser(user, productId, OrderStatus.DELIVERED);
+        long reviewCount = reviewRepository.countByUserAndProduct_Id(user, productId);
+
+        if(deliveredCount == 0){
+            throw new IllegalStateException("You can only write a review if you have purchased and received this product.");
         }
-        if(reviewRepository.existsByUserAndProduct_Id(user,productId)){
-            throw new IllegalStateException("You already reviewed this product.");
+        if(reviewCount >= deliveredCount){
+            throw new IllegalStateException("You have already reviewed all your delivered orders for this product.");
         }
+
         int oldCount = product.getReviewCount();
         double oldAverage = product.getAverageRating();
 
@@ -61,6 +67,18 @@ public class ReviewService {
         Pageable pageable = PageRequest.of(page, size);
         Page<Review> reviews = reviewRepository.findByProduct_Id(productId, pageable);
         return reviews.map(reviewMapper::toResponse);
+    }
+
+    public boolean canReview(String email, Long productId) {
+        User user = userRepository.findByEmail(email).orElse(null);
+        if (user == null) {
+            return false;
+        }
+
+        long deliveredCount = orderRepository.countDeliveredProductForUser(user, productId, OrderStatus.DELIVERED);
+        long reviewCount = reviewRepository.countByUserAndProduct_Id(user, productId);
+
+        return deliveredCount > reviewCount;
     }
 
 }

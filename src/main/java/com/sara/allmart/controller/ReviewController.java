@@ -37,4 +37,17 @@ public class ReviewController {
         Page<ReviewResponse> response = reviewService.getProductReviews(productId, page, size);
         return ResponseEntity.ok(response);
     }
+
+    @GetMapping("/{productId}/can-review")
+    public ResponseEntity<Boolean> checkReviewEligibility(
+            @AuthenticationPrincipal UserDetails user,
+            @PathVariable Long productId) {
+
+        if (user == null) {
+            return ResponseEntity.ok(false);
+        }
+
+        boolean isEligible = reviewService.canReview(user.getUsername(), productId);
+        return ResponseEntity.ok(isEligible);
+    }
 }
