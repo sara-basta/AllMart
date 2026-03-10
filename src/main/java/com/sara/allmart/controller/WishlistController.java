@@ -22,7 +22,7 @@ public class WishlistController {
         this.wishlistService = wishlistService;
     }
 
-    @PreAuthorize("hasAuthority('CUSTOMER')")
+    @PreAuthorize("hasAnyAuthority('CUSTOMER', 'ADMIN')")
     @GetMapping
     public ResponseEntity<Page<ProductResponse>> getAllWishlist(@AuthenticationPrincipal UserDetails user,
                                                                @RequestParam(defaultValue = "0") @Min(0) int page,

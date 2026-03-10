@@ -37,21 +37,21 @@ public class UserController {
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 
-    @PreAuthorize("hasAuthority('CUSTOMER')")
+    @PreAuthorize("hasAnyAuthority('CUSTOMER', 'ADMIN')")
     @PostMapping("/profile/addresses")
     public ResponseEntity<AddressResponse> addAddress(@AuthenticationPrincipal UserDetails user, @Valid @RequestBody AddressRequest request) {
         AddressResponse response = userService.addAddress(user.getUsername(), request);
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 
-    @PreAuthorize("hasAuthority('CUSTOMER')")
+    @PreAuthorize("hasAnyAuthority('CUSTOMER', 'ADMIN')")
     @GetMapping("/profile/addresses")
     public ResponseEntity<List<AddressResponse>> getAllAddresses(@AuthenticationPrincipal UserDetails user) {
         List<AddressResponse> response = userService.getAllAddresses(user.getUsername());
         return ResponseEntity.ok(response);
     }
 
-    @PreAuthorize("hasAuthority('CUSTOMER')")
+    @PreAuthorize("hasAnyAuthority('CUSTOMER', 'ADMIN')")
     @DeleteMapping("/profile/addresses/{addressId}")
     public ResponseEntity<Void> deleteAddress(@AuthenticationPrincipal UserDetails user,@PathVariable Long addressId) {
         userService.deleteAddress(user.getUsername(),addressId);
@@ -69,14 +69,14 @@ public class UserController {
         return ResponseEntity.ok(response);
     }
 
-    @PreAuthorize("hasAuthority('CUSTOMER')")
+    @PreAuthorize("hasAnyAuthority('CUSTOMER', 'ADMIN')")
     @GetMapping("/profile")
     public ResponseEntity<UserResponse> getProfile(@AuthenticationPrincipal UserDetails user){
         UserResponse response = userService.getProfile(user.getUsername());
         return ResponseEntity.ok(response);
     }
 
-    @PreAuthorize("hasAuthority('CUSTOMER')")
+    @PreAuthorize("hasAnyAuthority('CUSTOMER', 'ADMIN')")
     @PatchMapping("/profile")
     public ResponseEntity<UserResponse> updateProfile(@AuthenticationPrincipal UserDetails user,@RequestBody UpdateProfileRequest request){
         UserResponse response = userService.updateProfile(user.getUsername(),request);

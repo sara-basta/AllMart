@@ -51,7 +51,7 @@ public class OrderController {
         return ResponseEntity.ok(response);
     }
 
-    @PreAuthorize("hasAuthority('CUSTOMER')")
+    @PreAuthorize("hasAnyAuthority('CUSTOMER', 'ADMIN')")
     @GetMapping("/my-orders")
     public ResponseEntity<List<OrderResponse>> getOrdersHistory(@AuthenticationPrincipal UserDetails user){
         return ResponseEntity.ok(orderService.getOrdersHistory(user.getUsername()));

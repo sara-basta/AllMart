@@ -44,7 +44,7 @@ public class CartController {
         return ResponseEntity.ok(orderId);
     }
 
-    @PreAuthorize("hasAuthority('CUSTOMER')")
+    @PreAuthorize("hasAnyAuthority('CUSTOMER', 'ADMIN')")
     @GetMapping("/my-cart")
     public ResponseEntity<CartResponse> getCart(@AuthenticationPrincipal UserDetails user){
         return ResponseEntity.ok(cartService.getCart(user.getUsername()));
@@ -57,7 +57,7 @@ public class CartController {
         return ResponseEntity.noContent().build();
     }
 
-    @PreAuthorize("hasAuthority('CUSTOMER')")
+    @PreAuthorize("hasAnyAuthority('CUSTOMER', 'ADMIN')")
     @PostMapping("/sync")
     public ResponseEntity<CartResponse> syncCart(@AuthenticationPrincipal UserDetails user,
             @Valid @RequestBody List<CartRequest> items) {

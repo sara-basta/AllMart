@@ -21,7 +21,9 @@ public class JwtUtils {
     private int jwtExpirationMs;
 
     public String generateToken(UserDetails userDetails) {
+        String role = userDetails.getAuthorities().iterator().next().getAuthority();
         return Jwts.builder()
+                .claim("role", role)
                 .setSubject(userDetails.getUsername()) // Stores the Email inside the token
                 .setIssuedAt(new Date(System.currentTimeMillis()))
                 .setExpiration(new Date(System.currentTimeMillis() + jwtExpirationMs))
