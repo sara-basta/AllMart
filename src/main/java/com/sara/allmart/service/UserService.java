@@ -16,6 +16,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import org.springframework.security.crypto.password.PasswordEncoder;
 
 import java.util.List;
 
@@ -26,17 +27,20 @@ public class UserService {
     private final UserMapper userMapper;
     private final SavedAddressRepository savedAddressRepository;
     private final AddressMapper addressMapper;
+    private final PasswordEncoder passwordEncoder;
 
 
-    public UserService(UserRepository userRepository, UserMapper userMapper, SavedAddressRepository savedAddressRepository, AddressMapper addressMapper) {
+    public UserService(UserRepository userRepository, UserMapper userMapper, SavedAddressRepository savedAddressRepository, AddressMapper addressMapper, PasswordEncoder passwordEncoder) {
         this.userRepository = userRepository;
         this.userMapper = userMapper;
         this.savedAddressRepository = savedAddressRepository;
         this.addressMapper = addressMapper;
+        this.passwordEncoder = passwordEncoder;
     }
 
     public UserResponse createUser(UserRequest request) {
         User user = userMapper.toEntity(request);
+        user.setPassword(passwordEncoder.encode(request.password()));
         userRepository.save(user);
         return userMapper.toResponse(user);
     }

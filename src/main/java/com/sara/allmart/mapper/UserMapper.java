@@ -14,6 +14,7 @@ public class UserMapper {
         user.setLastName(request.lastName());
         user.setEmail(request.email());
         user.setPassword(request.password());
+        user.setRole(request.role());
         return user;
     }
 
