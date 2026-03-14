@@ -82,6 +82,15 @@ public class ProductService {
     public ProductResponse getProductById(Long id) {
         Product product = productRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Product not found!"));
+        if (product.isDeleted()) {
+            throw new ResourceNotFoundException("Product not found!");
+        }
+        return productMapper.toResponse(product);
+    }
+
+    public ProductResponse getAdminProductById(Long id) {
+        Product product = productRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Product not found!"));
         return productMapper.toResponse(product);
     }
 }

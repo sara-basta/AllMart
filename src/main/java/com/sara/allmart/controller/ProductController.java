@@ -111,4 +111,11 @@ public class ProductController {
         ProductResponse response = productService.getProductById(id);
         return ResponseEntity.ok(response);
     }
+
+    @PreAuthorize("hasAuthority('ADMIN')")
+    @GetMapping("/admin/{id}")
+    public ResponseEntity<ProductResponse> getAdminProductById(@PathVariable Long id) {
+        ProductResponse response = productService.getAdminProductById(id);
+        return ResponseEntity.ok(response);
+    }
 }
