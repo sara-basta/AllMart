@@ -1,5 +1,6 @@
 package com.sara.allmart.service;
 
+import com.sara.allmart.dto.request.AddressRequest;
 import com.sara.allmart.dto.request.OrderRequest;
 import com.sara.allmart.dto.response.OrderResponse;
 import com.sara.allmart.entity.*;
@@ -35,7 +36,7 @@ public class OrderService {
         this.savedAddressRepository = savedAddressRepository;
     }
 
-    @Transactional // so that if saving fails, stock goes back to normal (doesn't get decremented)
+    @Transactional
     public OrderResponse createOrder (String email, OrderRequest request){
         User user = userRepository.findByEmail(email)
                 .orElseThrow(() -> new RuntimeException("User not found"));
@@ -85,11 +86,22 @@ public class OrderService {
         return orderMapper.toResponse(orderRepository.save(order));
     }
 
-    public OrderResponse getOrderById(Long id) {
-        return orderMapper.toResponse(orderRepository.findById(id)
-                .orElseThrow(()-> {
-                    log.error("Order not found with ID: {}", id);
-                    return new ResourceNotFoundException("Order not found!");}));
+    public OrderResponse getCustomerOrderById(Long orderId, String email) {
+        Order order = orderRepository.findById(orderId)
+                .orElseThrow(() -> new ResourceNotFoundException("Order not found!"));
+
+        if (!order.getUser().getEmail().equals(email)) {
+            throw new RuntimeException("Access Denied: You cannot view someone else's order.");
+        }
+
+        return orderMapper.toResponse(order);
+    }
+
+    public OrderResponse getAdminOrderById(Long orderId) {
+        Order order = orderRepository.findById(orderId)
+                .orElseThrow(() -> new ResourceNotFoundException("Order not found!"));
+
+        return orderMapper.toResponse(order);
     }
 
     public List<OrderResponse> getOrderByUser(Long id) {
@@ -115,7 +127,7 @@ public class OrderService {
     }
 
     @Transactional
-    public Long createOrderFromCart(String email, List<CartItem> items,Long addressId) {
+    public Long createOrderFromCart(String email, List<CartItem> items,Long addressId, AddressRequest newAddress) {
         User user = userRepository.findByEmail(email)
                 .orElseThrow(() -> new ResourceNotFoundException("User not found"));
 
@@ -124,17 +136,32 @@ public class OrderService {
         order.setStatus(OrderStatus.PENDING);
         order.setCreatedAt(LocalDateTime.now());
 
-        SavedAddress savedAddress = savedAddressRepository.findById(addressId)
-                .orElseThrow(() -> new RuntimeException("Address not found"));
-        if (!savedAddress.getUser().getEmail().equals(email)) {
-            throw new RuntimeException("Access Denied: You cannot use an address that isn't yours!");
+        Address shippingAddress;
+
+        if (addressId != null) {
+            SavedAddress savedAddress = savedAddressRepository.findById(addressId)
+                    .orElseThrow(() -> new RuntimeException("Address not found"));
+
+            if (!savedAddress.getUser().getEmail().equals(email)) {
+                throw new RuntimeException("Access Denied: You cannot use an address that isn't yours!");
+            }
+            shippingAddress = new Address(savedAddress.getStreet(), savedAddress.getCity(), savedAddress.getZipCode());
+
+        } else if (newAddress != null) {
+            // create and save the new address to the user's profile automatically
+            SavedAddress savedAddress = new SavedAddress();
+            savedAddress.setStreet(newAddress.street());
+            savedAddress.setCity(newAddress.city());
+            savedAddress.setZipCode(newAddress.zipCode());
+            savedAddress.setUser(user);
+            savedAddressRepository.save(savedAddress);
+
+            shippingAddress = new Address(newAddress.street(), newAddress.city(), newAddress.zipCode());
+        } else {
+            throw new RuntimeException("Checkout failed: You must provide either an existing address ID or a new address.");
         }
 
-        Address shippingAddress = new Address(
-                savedAddress.getStreet(),
-                savedAddress.getCity(),
-                savedAddress.getZipCode()
-        );
+
         order.setShippingAddress(shippingAddress);
 
         List<OrderItem> orderItems = new ArrayList<>();

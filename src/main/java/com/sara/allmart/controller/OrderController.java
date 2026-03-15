@@ -30,10 +30,21 @@ public class OrderController {
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 
-    @PreAuthorize("hasAuthority('ADMIN')")
+    @PreAuthorize("hasAuthority('CUSTOMER')")
     @GetMapping("/{id}")
-    public ResponseEntity<OrderResponse> getOrderById(@PathVariable Long id) {
-        OrderResponse response = orderService.getOrderById(id);
+    public ResponseEntity<OrderResponse> getCustomerOrderById(
+            @PathVariable Long id,
+            @AuthenticationPrincipal UserDetails userDetails) {
+
+        OrderResponse response = orderService.getCustomerOrderById(id, userDetails.getUsername());
+        return ResponseEntity.ok(response);
+    }
+
+    @PreAuthorize("hasAuthority('ADMIN')")
+    @GetMapping("/admin/{id}")
+    public ResponseEntity<OrderResponse> getAdminOrderById(@PathVariable Long id) {
+
+        OrderResponse response = orderService.getAdminOrderById(id);
         return ResponseEntity.ok(response);
     }
 

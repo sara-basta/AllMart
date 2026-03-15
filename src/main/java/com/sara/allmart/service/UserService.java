@@ -73,6 +73,27 @@ public class UserService {
         savedAddressRepository.delete(address);
     }
 
+    public AddressResponse updateAddress(String email, Long addressId, AddressRequest request) {
+        SavedAddress address = savedAddressRepository.findById(addressId)
+                .orElseThrow(() -> new ResourceNotFoundException("Address not found!"));
+
+        if (!address.getUser().getEmail().equals(email)) {
+            throw new RuntimeException("Access Denied: You cannot edit an address that isn't yours!");
+        }
+
+        if (request.street() != null && !request.street().isBlank()) {
+            address.setStreet(request.street());
+        }
+        if (request.city() != null && !request.city().isBlank()) {
+            address.setCity(request.city());
+        }
+        if (request.zipCode() != null && !request.zipCode().isBlank()) {
+            address.setZipCode(request.zipCode());
+        }
+
+        return addressMapper.toResponse(savedAddressRepository.save(address));
+    }
+
     public Page<UserResponse> getUsers(Long id, int page, int size) {
         Pageable pageable = PageRequest.of(page,size);
         return userRepository.searchUsers(id,pageable)

@@ -1,5 +1,6 @@
 package com.sara.allmart.service;
 
+import com.sara.allmart.dto.request.AddressRequest;
 import com.sara.allmart.dto.request.CartRequest;
 import com.sara.allmart.dto.response.CartResponse;
 import com.sara.allmart.entity.Cart;
@@ -102,13 +103,13 @@ public class CartService {
         cartRepository.save(cart);
     }
 
-    public Long checkout(String email,Long addressId) {
+    public Long checkout(String email, Long addressId, AddressRequest newAddress) {
         Cart cart = getCartEntity(email);
         if (cart.getItems().isEmpty()) {
             throw new RuntimeException("Cannot checkout an empty cart.");
         }
 
-        Long orderId = orderService.createOrderFromCart(email, cart.getItems(), addressId);
+        Long orderId = orderService.createOrderFromCart(email, cart.getItems(), addressId,newAddress);
 
         clearCart(email);
 

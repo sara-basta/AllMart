@@ -58,6 +58,17 @@ public class UserController {
         return ResponseEntity.noContent().build();
     }
 
+    @PreAuthorize("hasAnyAuthority('CUSTOMER', 'ADMIN')")
+    @PatchMapping("/profile/addresses/{addressId}")
+    public ResponseEntity<AddressResponse> updateAddress(
+            @AuthenticationPrincipal UserDetails user,
+            @PathVariable Long addressId,
+            @Valid @RequestBody AddressRequest request) {
+
+        AddressResponse response = userService.updateAddress(user.getUsername(), addressId, request);
+        return ResponseEntity.ok(response);
+    }
+
     @PreAuthorize("hasAuthority('ADMIN')")
     @GetMapping
     public ResponseEntity<Page<UserResponse>> getUsers(

@@ -1,5 +1,6 @@
 package com.sara.allmart.controller;
 
+import com.sara.allmart.dto.request.AddressRequest;
 import com.sara.allmart.dto.request.CartRequest;
 import com.sara.allmart.dto.response.CartResponse;
 import com.sara.allmart.service.CartService;
@@ -39,8 +40,9 @@ public class CartController {
 
     @PreAuthorize("hasAuthority('CUSTOMER')")
     @PostMapping ("/my-cart/checkout")
-    public ResponseEntity<Long> checkout(@AuthenticationPrincipal UserDetails user,@RequestParam Long addressId){
-        Long orderId = cartService.checkout(user.getUsername(), addressId);
+    public ResponseEntity<Long> checkout(@AuthenticationPrincipal UserDetails user,@RequestParam(required = false) Long addressId,
+                                         @RequestBody(required = false) AddressRequest newAddress){
+        Long orderId = cartService.checkout(user.getUsername(), addressId, newAddress);
         return ResponseEntity.ok(orderId);
     }
 
