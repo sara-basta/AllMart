@@ -9,6 +9,7 @@ import com.sara.allmart.exception.ResourceNotFoundException;
 import com.sara.allmart.mapper.ProductMapper;
 import com.sara.allmart.repository.CategoryRepository;
 import com.sara.allmart.repository.ProductRepository;
+import jakarta.transaction.Transactional;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -33,32 +34,6 @@ public class ProductService {
         Product product = productMapper.toEntity(request);
         productRepository.save(product);
 
-        return productMapper.toResponse(product);
-    }
-
-    public ProductResponse updatePrice(Long id, BigDecimal newPrice) {
-        Product product = productRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Product not found!"));
-        product.setPrice(newPrice);
-        productRepository.save(product);
-        return productMapper.toResponse(product);
-    }
-
-    public ProductResponse updateStock(Long id, Integer newStock) {
-        Product product = productRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Product not found!"));
-        product.setStockQuantity(newStock);
-        productRepository.save(product);
-        return productMapper.toResponse(product);
-    }
-
-    public ProductResponse updateCategory(Long id, ProductCategoryRequest request) {
-        Product product = productRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Product not found!"));
-        Category category = categoryRepository.findById(request.categoryId())
-                .orElseThrow(() -> new ResourceNotFoundException("Category not found!"));
-        product.setCategory(category);
-        productRepository.save(product);
         return productMapper.toResponse(product);
     }
 
@@ -92,5 +67,23 @@ public class ProductService {
         Product product = productRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Product not found!"));
         return productMapper.toResponse(product);
+    }
+
+    @Transactional
+    public ProductResponse updateProduct(Long id, ProductRequest request) {
+        Product product = productRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Product not found with ID: " + id));
+
+        Category category = categoryRepository.findById(request.categoryId())
+                .orElseThrow(() -> new ResourceNotFoundException("Category not found with ID: " + request.categoryId()));
+
+        product.setName(request.name());
+        product.setDescription(request.description());
+        product.setPrice(request.price());
+        product.setStockQuantity(request.stockQuantity());
+        product.setImageUrl(request.imageUrl());
+        product.setCategory(category);
+
+        return productMapper.toResponse(productRepository.save(product));
     }
 }

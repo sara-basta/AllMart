@@ -12,6 +12,10 @@ import com.sara.allmart.repository.SavedAddressRepository;
 import com.sara.allmart.repository.UserRepository;
 import jakarta.transaction.Transactional;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
@@ -195,15 +199,15 @@ public class OrderService {
         return savedOrder.getId();
     }
 
-    public List<OrderResponse> getOrdersHistory(String email) {
+    public Page<OrderResponse> getOrdersHistory(String email, int page, int size) {
+        Pageable pageable = PageRequest.of(page, size, Sort.by("createdAt").descending());
+
         User user = userRepository.findByEmail(email)
-                .orElseThrow(() -> new RuntimeException("User not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("User not found"));
 
-        List<Order> orders = orderRepository.findByUserOrderByCreatedAtDesc(user);
+        Page<Order> ordersPage = orderRepository.findByUser(user, pageable);
 
-        return orders.stream()
-                .map(orderMapper::toResponse)
-                .toList();
+        return ordersPage.map(orderMapper::toResponse);
     }
 
     @Transactional

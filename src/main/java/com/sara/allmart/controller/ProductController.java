@@ -77,29 +77,6 @@ public class ProductController {
     }
 
     @PreAuthorize("hasAuthority('ADMIN')")
-    @PatchMapping("/{id}/price")
-    public ResponseEntity<ProductResponse> updatePrice(@PathVariable Long id, @Valid @RequestBody ProductPriceRequest request){
-        ProductResponse response = productService.updatePrice(id, request.price());
-        return ResponseEntity.ok(response);
-    }
-
-    @PreAuthorize("hasAuthority('ADMIN')")
-    @PatchMapping("/{id}/stock")
-    public ResponseEntity<ProductResponse> updateStock(@PathVariable Long id,@Valid @RequestBody ProductStockRequest request){
-        ProductResponse response = productService.updateStock(id, request.stock());
-        return ResponseEntity.ok(response);
-
-    }
-
-    @PreAuthorize("hasAuthority('ADMIN')")
-    @PatchMapping("/{id}/category")
-    public ResponseEntity<ProductResponse> updateCategory(@PathVariable Long id, @Valid @RequestBody ProductCategoryRequest request){
-        ProductResponse response = productService.updateCategory(id, request);
-        return ResponseEntity.ok(response);
-
-    }
-
-    @PreAuthorize("hasAuthority('ADMIN')")
     @DeleteMapping("/{id}")
     public ResponseEntity<ProductResponse> deleteProduct(@PathVariable Long id){
         ProductResponse response = productService.deleteProduct(id);
@@ -116,6 +93,17 @@ public class ProductController {
     @GetMapping("/admin/{id}")
     public ResponseEntity<ProductResponse> getAdminProductById(@PathVariable Long id) {
         ProductResponse response = productService.getAdminProductById(id);
+        return ResponseEntity.ok(response);
+    }
+
+    @PreAuthorize("hasAuthority('ADMIN')")
+    @Operation(summary = "Update an existing product",
+            description = "Updates all fields of the product (Name, Description, Price, Stock, Category).")
+    @PutMapping("/{id}")
+    public ResponseEntity<ProductResponse> updateProduct(
+            @PathVariable Long id,
+            @Valid @RequestBody ProductRequest request) {
+        ProductResponse response = productService.updateProduct(id, request);
         return ResponseEntity.ok(response);
     }
 }

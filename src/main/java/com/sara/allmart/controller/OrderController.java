@@ -5,6 +5,7 @@ import com.sara.allmart.dto.request.OrderStatusRequest;
 import com.sara.allmart.dto.response.OrderResponse;
 import com.sara.allmart.service.OrderService;
 import jakarta.validation.Valid;
+import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -64,8 +65,12 @@ public class OrderController {
 
     @PreAuthorize("hasAnyAuthority('CUSTOMER', 'ADMIN')")
     @GetMapping("/my-orders")
-    public ResponseEntity<List<OrderResponse>> getOrdersHistory(@AuthenticationPrincipal UserDetails user){
-        return ResponseEntity.ok(orderService.getOrdersHistory(user.getUsername()));
+    public ResponseEntity<Page<OrderResponse>> getOrdersHistory(
+            @AuthenticationPrincipal UserDetails user,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size
+    ){
+        return ResponseEntity.ok(orderService.getOrdersHistory(user.getUsername(), page, size));
     }
 
     @PreAuthorize("hasAuthority('CUSTOMER')")
