@@ -1,6 +1,7 @@
 package com.sara.allmart.service;
 
 import com.sara.allmart.dto.request.AddressRequest;
+import com.sara.allmart.dto.request.ChangePasswordRequest;
 import com.sara.allmart.dto.request.UpdateProfileRequest;
 import com.sara.allmart.dto.request.UserRequest;
 import com.sara.allmart.dto.response.AddressResponse;
@@ -12,9 +13,11 @@ import com.sara.allmart.mapper.AddressMapper;
 import com.sara.allmart.mapper.UserMapper;
 import com.sara.allmart.repository.SavedAddressRepository;
 import com.sara.allmart.repository.UserRepository;
+import jakarta.transaction.Transactional;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.stereotype.Service;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
@@ -118,5 +121,22 @@ public class UserService {
         }
        userRepository.save(user);
         return userMapper.toResponse(user);
+    }
+
+    @Transactional
+    public void changePassword(String email, ChangePasswordRequest request) {
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+
+        if (!passwordEncoder.matches(request.oldPassword(), user.getPassword())) {
+            throw new BadCredentialsException("Current password is incorrect.");
+        }
+
+        if (!request.newPassword().equals(request.confirmPassword())) {
+            throw new IllegalArgumentException("New passwords do not match.");
+        }
+
+        user.setPassword(passwordEncoder.encode(request.newPassword()));
+        userRepository.save(user);
     }
 }

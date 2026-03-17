@@ -1,6 +1,7 @@
 package com.sara.allmart.controller;
 
 import com.sara.allmart.dto.request.AddressRequest;
+import com.sara.allmart.dto.request.ChangePasswordRequest;
 import com.sara.allmart.dto.request.UpdateProfileRequest;
 import com.sara.allmart.dto.request.UserRequest;
 import com.sara.allmart.dto.response.AddressResponse;
@@ -19,6 +20,7 @@ import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api/users")
@@ -92,5 +94,15 @@ public class UserController {
     public ResponseEntity<UserResponse> updateProfile(@AuthenticationPrincipal UserDetails user,@RequestBody UpdateProfileRequest request){
         UserResponse response = userService.updateProfile(user.getUsername(),request);
         return ResponseEntity.ok(response);
+    }
+
+    @PutMapping("/profile/change-password")
+    public ResponseEntity<Map<String, String>> changePassword(
+            @AuthenticationPrincipal UserDetails userDetails,
+            @Valid @RequestBody ChangePasswordRequest request) {
+
+        userService.changePassword(userDetails.getUsername(), request);
+
+        return ResponseEntity.ok(Map.of("message", "Password updated successfully"));
     }
 }
