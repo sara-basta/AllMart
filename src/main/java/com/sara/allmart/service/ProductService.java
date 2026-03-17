@@ -1,10 +1,10 @@
 package com.sara.allmart.service;
 
-import com.sara.allmart.dto.request.ProductCategoryRequest;
 import com.sara.allmart.dto.request.ProductRequest;
 import com.sara.allmart.dto.response.ProductResponse;
 import com.sara.allmart.entity.Category;
 import com.sara.allmart.entity.Product;
+import com.sara.allmart.entity.ProductImage;
 import com.sara.allmart.exception.ResourceNotFoundException;
 import com.sara.allmart.mapper.ProductMapper;
 import com.sara.allmart.repository.CategoryRepository;
@@ -13,7 +13,6 @@ import jakarta.transaction.Transactional;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
@@ -81,7 +80,16 @@ public class ProductService {
         product.setDescription(request.description());
         product.setPrice(request.price());
         product.setStockQuantity(request.stockQuantity());
-        product.setImageUrl(request.imageUrl());
+
+        if (request.imageUrls() != null && !request.imageUrls().isEmpty()) {
+            for (int i = 0; i < request.imageUrls().size(); i++) {
+                ProductImage img = ProductImage.builder()
+                        .imageUrl(request.imageUrls().get(i))
+                        .position(i)
+                        .build();
+                product.addImage(img);
+            }
+        }
         product.setCategory(category);
 
         return productMapper.toResponse(productRepository.save(product));

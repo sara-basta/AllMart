@@ -1,6 +1,7 @@
 package com.sara.allmart.dto.response;
 
 import java.math.BigDecimal;
+import java.util.List;
 
 public record ProductResponse(
         Long id,
@@ -9,7 +10,7 @@ public record ProductResponse(
         BigDecimal price,
         Integer stockQuantity,
         String categoryName,
-        String imageUrl,
+        List<ProductImage> images,
         int reviewCount,
         double averageRating
 ){
