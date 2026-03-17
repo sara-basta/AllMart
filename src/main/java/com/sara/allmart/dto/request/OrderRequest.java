@@ -5,7 +5,7 @@ import jakarta.validation.constraints.NotNull;
 public record OrderRequest (
         @NotNull
         Long productId,
-        @NotNull
-        Long addressId
+        Long addressId,
+        AddressRequest newAddress
 ){
 }

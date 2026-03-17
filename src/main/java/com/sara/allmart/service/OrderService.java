@@ -69,16 +69,31 @@ public class OrderService {
         order.setTotalAmount(total);
 
         item.setOrder(order);
-        SavedAddress savedAddress = savedAddressRepository.findById(request.addressId())
-                .orElseThrow(() -> new RuntimeException("Address not found"));
-        if (!savedAddress.getUser().getEmail().equals(email)) {
-            throw new RuntimeException("Access Denied: You cannot use an address that isn't yours!");
+
+        Address shippingAddress;
+
+        if (request.addressId() != null) {
+            SavedAddress savedAddress = savedAddressRepository.findById(request.addressId())
+                    .orElseThrow(() -> new RuntimeException("Address not found"));
+
+            if (!savedAddress.getUser().getEmail().equals(email)) {
+                throw new RuntimeException("Access Denied: You cannot use an address that isn't yours!");
+            }
+            shippingAddress = new Address(savedAddress.getStreet(), savedAddress.getCity(), savedAddress.getZipCode());
+
+        } else if (request.newAddress() != null) {
+            SavedAddress savedAddress = new SavedAddress();
+            savedAddress.setStreet(request.newAddress().street());
+            savedAddress.setCity(request.newAddress().city());
+            savedAddress.setZipCode(request.newAddress().zipCode());
+            savedAddress.setUser(user);
+            savedAddressRepository.save(savedAddress);
+
+            shippingAddress = new Address(request.newAddress().street(), request.newAddress().city(), request.newAddress().zipCode());
+        } else {
+            throw new RuntimeException("Checkout failed: You must provide either an existing address ID or a new address.");
         }
-        Address shippingAddress = new Address(
-                savedAddress.getStreet(),
-                savedAddress.getCity(),
-                savedAddress.getZipCode()
-        );
+
         order.setShippingAddress(shippingAddress);
         order.setUser(user);
 
