@@ -12,6 +12,8 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.util.Map;
+
 @RestController
 @RequestMapping("/api/payments")
 public class PaymentController {
@@ -23,8 +25,8 @@ public class PaymentController {
 
     @PreAuthorize("hasAuthority('CUSTOMER')")
     @PostMapping
-    public ResponseEntity<String> processPayment(@AuthenticationPrincipal UserDetails user,@Valid @RequestBody PaymentRequest request) {
-        String response = paymentService.processPayment(user.getUsername(), request);
+    public ResponseEntity<Map<String, String>> processPayment(@AuthenticationPrincipal UserDetails user, @Valid @RequestBody PaymentRequest request) {
+        Map<String, String> response = paymentService.processPayment(user.getUsername(), request);
         return ResponseEntity.ok(response);
     }
     }
