@@ -4,6 +4,7 @@ import com.sara.allmart.dto.request.AddressRequest;
 import com.sara.allmart.dto.request.OrderRequest;
 import com.sara.allmart.dto.response.OrderResponse;
 import com.sara.allmart.entity.*;
+import com.sara.allmart.event.OrderStatusEvent;
 import com.sara.allmart.exception.ResourceNotFoundException;
 import com.sara.allmart.mapper.OrderMapper;
 import com.sara.allmart.repository.OrderRepository;
@@ -12,6 +13,7 @@ import com.sara.allmart.repository.SavedAddressRepository;
 import com.sara.allmart.repository.UserRepository;
 import jakarta.transaction.Transactional;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -31,13 +33,15 @@ public class OrderService {
     private final UserRepository userRepository;
     private final OrderMapper orderMapper;
     private final SavedAddressRepository savedAddressRepository;
+    private final ApplicationEventPublisher eventPublisher;
 
-    OrderService(OrderRepository orderRepository, ProductRepository productRepository, UserRepository userRepository, OrderMapper orderMapper, SavedAddressRepository savedAddressRepository){
+    OrderService(OrderRepository orderRepository, ProductRepository productRepository, UserRepository userRepository, OrderMapper orderMapper, SavedAddressRepository savedAddressRepository, ApplicationEventPublisher eventPublisher){
         this.orderRepository = orderRepository;
         this.productRepository = productRepository;
         this.userRepository = userRepository;
         this.orderMapper = orderMapper;
         this.savedAddressRepository = savedAddressRepository;
+        this.eventPublisher = eventPublisher;
     }
 
     @Transactional
@@ -142,6 +146,9 @@ public class OrderService {
             throw new IllegalStateException("You cannot change a delivered order's status !");
         }
         order.setStatus(newStatus);
+        orderRepository.save(order);
+
+        eventPublisher.publishEvent(new OrderStatusEvent(this, order, newStatus.name()));
         return orderMapper.toResponse(order);
     }
 
@@ -236,8 +243,8 @@ public class OrderService {
             throw new RuntimeException("You are not allowed to cancel this order");
         }
 
-        if (order.getStatus() != OrderStatus.PENDING) {
-            throw new IllegalStateException("Order cannot be cancelled");
+        if (order.getStatus() != OrderStatus.PENDING && order.getStatus() != OrderStatus.CONFIRMED) {
+            throw new IllegalStateException("Order has progressed too far and can no longer be cancelled by the user.");
         }
 
         List<OrderItem> items = order.getItems();
@@ -251,6 +258,9 @@ public class OrderService {
             product.setStockQuantity(product.getStockQuantity()+quantity);
         }
         order.setStatus(OrderStatus.CANCELLED);
+        orderRepository.save(order);
+
+        eventPublisher.publishEvent(new OrderStatusEvent(this, order, "CANCELLED"));
 
         return orderMapper.toResponse(order);
     }

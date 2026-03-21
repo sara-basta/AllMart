@@ -2,6 +2,7 @@ package com.sara.allmart.service;
 
 import com.sara.allmart.entity.Order;
 import com.sara.allmart.entity.OrderStatus;
+import com.sara.allmart.event.OrderStatusEvent;
 import com.sara.allmart.repository.OrderRepository;
 import com.stripe.exception.EventDataObjectDeserializationException;
 import com.stripe.exception.SignatureVerificationException;
@@ -10,6 +11,7 @@ import com.stripe.model.PaymentIntent;
 import com.stripe.net.Webhook;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 
 @Slf4j
@@ -20,9 +22,11 @@ public class WebhookService {
     private String endpointSecret;
 
     private final OrderRepository orderRepository;
+    private final ApplicationEventPublisher eventPublisher;
 
-    public WebhookService(OrderRepository orderRepository) {
+    public WebhookService(OrderRepository orderRepository, ApplicationEventPublisher eventPublisher) {
         this.orderRepository = orderRepository;
+        this.eventPublisher = eventPublisher;
     }
 
     public void processStripeEvent(String payload, String sigHeader) throws SignatureVerificationException {
@@ -59,6 +63,7 @@ public class WebhookService {
                     order.setPaid(true);
                     order.setStatus(OrderStatus.PAID);
                     orderRepository.save(order);
+                    eventPublisher.publishEvent(new OrderStatusEvent(this, order, "PAID"));
                     log.info("SUCCESS: Order {} is now PAID.", orderId);
                 } else {
                     log.error("Order {} was not found in the database.", orderId);

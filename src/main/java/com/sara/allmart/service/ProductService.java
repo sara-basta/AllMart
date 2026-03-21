@@ -14,6 +14,8 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import org.springframework.cache.annotation.Cacheable;
+import org.springframework.cache.annotation.CacheEvict;
 
 import java.math.BigDecimal;
 
@@ -29,6 +31,7 @@ public class ProductService {
         this.categoryRepository = categoryRepository;
     }
 
+    @CacheEvict(value = "products", allEntries = true)
     public ProductResponse createProduct(ProductRequest request) {
         Product product = productMapper.toEntity(request);
         productRepository.save(product);
@@ -36,6 +39,7 @@ public class ProductService {
         return productMapper.toResponse(product);
     }
 
+    @Cacheable(value = "products")
     public Page<ProductResponse> searchProducts(String name, Long categoryId, BigDecimal minPrice, BigDecimal maxPrice,boolean isDeleted, int page, int size) {
         Pageable pageable = PageRequest.of(page, size);
 
@@ -44,6 +48,7 @@ public class ProductService {
     }
 
     // soft-delete
+    @CacheEvict(value = "products", allEntries = true)
     public ProductResponse deleteProduct(Long id) {
         Product product = productRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Product not found!"));
@@ -69,6 +74,7 @@ public class ProductService {
     }
 
     @Transactional
+    @CacheEvict(value = "products", allEntries = true)
     public ProductResponse updateProduct(Long id, ProductRequest request) {
         Product product = productRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Product not found with ID: " + id));

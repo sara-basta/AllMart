@@ -5,11 +5,13 @@ import com.sara.allmart.entity.Order;
 import com.sara.allmart.entity.OrderStatus;
 import com.sara.allmart.entity.PaymentMethod;
 import com.sara.allmart.entity.User;
+import com.sara.allmart.event.OrderStatusEvent;
 import com.sara.allmart.exception.ResourceNotFoundException;
 import com.sara.allmart.repository.OrderRepository;
 import com.sara.allmart.repository.UserRepository;
 import com.stripe.model.PaymentIntent;
 import jakarta.transaction.Transactional;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 
 import java.util.HashMap;
@@ -20,11 +22,13 @@ public class PaymentService {
     private final OrderRepository orderRepository;
     private final UserRepository userRepository;
     private final StripeService stripeService;
+    private final ApplicationEventPublisher eventPublisher;
 
-    public PaymentService(OrderRepository orderRepository, UserRepository userRepository, StripeService stripeService) {
+    public PaymentService(OrderRepository orderRepository, UserRepository userRepository, StripeService stripeService, ApplicationEventPublisher eventPublisher) {
         this.orderRepository = orderRepository;
         this.userRepository = userRepository;
         this.stripeService = stripeService;
+        this.eventPublisher = eventPublisher;
     }
 
     @Transactional
@@ -59,6 +63,10 @@ public class PaymentService {
             response.put("message", "Order successfully placed for Cash on Delivery!");
         }
         orderRepository.save(order);
+
+        if(request.paymentMethod() == PaymentMethod.CASH_ON_DELIVERY) {
+            eventPublisher.publishEvent(new OrderStatusEvent(this, order, "CONFIRMED"));
+        }
         return response;
     }
 }
