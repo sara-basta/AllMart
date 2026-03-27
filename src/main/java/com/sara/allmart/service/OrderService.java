@@ -1,6 +1,8 @@
 package com.sara.allmart.service;
 
 import com.sara.allmart.dto.request.AddressRequest;
+import com.sara.allmart.dto.request.CheckoutItemRequest;
+import com.sara.allmart.dto.request.GuestCheckoutRequest;
 import com.sara.allmart.dto.request.OrderRequest;
 import com.sara.allmart.dto.response.OrderResponse;
 import com.sara.allmart.entity.*;
@@ -219,6 +221,65 @@ public class OrderService {
 
         Order savedOrder = orderRepository.save(order);
         return savedOrder.getId();
+    }
+
+    @Transactional
+    public OrderResponse createGuestOrder(GuestCheckoutRequest request) {
+        Order order = new Order();
+        order.setUser(null);
+        order.setGuestEmail(request.email());
+        order.setStatus(OrderStatus.PENDING);
+        order.setCreatedAt(LocalDateTime.now());
+        order.setPaymentMethod(request.paymentMethod());
+
+        Address shippingAddress = request.shippingAddress();
+        order.setShippingAddress(new Address(
+                shippingAddress.getStreet(),
+                shippingAddress.getCity(),
+                shippingAddress.getZipCode()
+        ));
+
+        List<OrderItem> orderItems = new ArrayList<>();
+        BigDecimal totalOrderAmount = BigDecimal.ZERO;
+
+        for (CheckoutItemRequest checkoutItem : request.items()) {
+            Product product = productRepository.findById(checkoutItem.productId())
+                    .orElseThrow(() -> new ResourceNotFoundException("Product not found"));
+
+            if (product.getStockQuantity() < checkoutItem.quantity()) {
+                throw new RuntimeException("Product " + product.getName() + " is out of stock!");
+            }
+
+            product.setStockQuantity(product.getStockQuantity() - checkoutItem.quantity());
+            productRepository.save(product);
+
+            OrderItem orderItem = new OrderItem();
+            orderItem.setOrder(order);
+            orderItem.setProduct(product);
+            orderItem.setQuantity(checkoutItem.quantity());
+            orderItem.setPriceAtPurchase(product.getPrice());
+
+            orderItems.add(orderItem);
+
+            BigDecimal lineTotal = product.getPrice().multiply(BigDecimal.valueOf(checkoutItem.quantity()));
+            totalOrderAmount = totalOrderAmount.add(lineTotal);
+        }
+
+        order.setItems(orderItems);
+        order.setTotalAmount(totalOrderAmount);
+
+        if (request.paymentMethod() == PaymentMethod.CASH_ON_DELIVERY) {
+            order.setPaid(false);
+            order.setStatus(OrderStatus.CONFIRMED);
+        }
+
+        Order savedOrder = orderRepository.save(order);
+
+        if (request.paymentMethod() == PaymentMethod.CASH_ON_DELIVERY) {
+            eventPublisher.publishEvent(new OrderStatusEvent(this, savedOrder, "CONFIRMED"));
+        }
+
+        return orderMapper.toResponse(savedOrder);
     }
 
     public Page<OrderResponse> getOrdersHistory(String email, int page, int size) {

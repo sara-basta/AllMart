@@ -6,10 +6,10 @@ import com.sara.allmart.repository.OrderRepository;
 import com.sara.allmart.service.EmailService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.context.event.EventListener;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
-import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.event.TransactionPhase;
+import org.springframework.transaction.event.TransactionalEventListener;
 
 @Slf4j
 @Component
@@ -18,13 +18,12 @@ public class OrderEmailListener {
 
     private final EmailService emailService;
     private final OrderRepository orderRepository;
+
     @Async
-    @Transactional // added this so the thread gets its own database session
-    @EventListener
+    @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT, fallbackExecution = true)
     public void handleOrderStatusEvent(OrderStatusEvent event) {
 
-        // re-fetch the order directly from the database to avoid closed session errors
-        Order order = orderRepository.findById(event.getOrder().getId()).orElse(null);
+        Order order = orderRepository.findByIdWithUser(event.getOrder().getId()).orElse(null);
 
         if (order == null) {
             log.error("Could not find order to send email!");

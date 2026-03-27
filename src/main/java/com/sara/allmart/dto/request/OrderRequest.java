@@ -6,6 +6,7 @@ public record OrderRequest (
         @NotNull
         Long productId,
         Long addressId,
-        AddressRequest newAddress
+        AddressRequest newAddress,
+        String email
 ){
 }
