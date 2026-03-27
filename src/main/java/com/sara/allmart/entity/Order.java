@@ -40,7 +40,6 @@ public class Order extends BaseEntity{
     })
     private Address shippingAddress;
 
-    @NotNull
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id")
     private User user;
@@ -56,4 +55,6 @@ public class Order extends BaseEntity{
 
     @Enumerated(EnumType.STRING)
     private PaymentMethod paymentMethod;
+
+    private String guestEmail;
 }
