@@ -46,6 +46,7 @@ public class StripeService {
         SessionCreateParams params = SessionCreateParams.builder()
                 .setMode(SessionCreateParams.Mode.PAYMENT)
                 .setCustomerEmail(guestEmail)
+                .setLocale(SessionCreateParams.Locale.EN)
                 .putMetadata("orderId", String.valueOf(orderId))
                 .setPaymentIntentData(
                         SessionCreateParams.PaymentIntentData.builder()

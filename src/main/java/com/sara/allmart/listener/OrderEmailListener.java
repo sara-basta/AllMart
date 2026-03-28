@@ -6,10 +6,8 @@ import com.sara.allmart.repository.OrderRepository;
 import com.sara.allmart.service.EmailService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.scheduling.annotation.Async;
+import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Component;
-import org.springframework.transaction.event.TransactionPhase;
-import org.springframework.transaction.event.TransactionalEventListener;
 
 @Slf4j
 @Component
@@ -19,8 +17,7 @@ public class OrderEmailListener {
     private final EmailService emailService;
     private final OrderRepository orderRepository;
 
-    @Async
-    @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT, fallbackExecution = true)
+    @EventListener
     public void handleOrderStatusEvent(OrderStatusEvent event) {
 
         Order order = orderRepository.findByIdWithUser(event.getOrder().getId()).orElse(null);
