@@ -18,6 +18,8 @@ import org.springframework.cache.annotation.Cacheable;
 import org.springframework.cache.annotation.CacheEvict;
 
 import java.math.BigDecimal;
+import java.util.LinkedHashSet;
+import java.util.List;
 
 @Service
 public class ProductService {
@@ -87,10 +89,12 @@ public class ProductService {
         product.setPrice(request.price());
         product.setStockQuantity(request.stockQuantity());
 
-        if (request.imageUrls() != null && !request.imageUrls().isEmpty()) {
-            for (int i = 0; i < request.imageUrls().size(); i++) {
+        if (request.imageUrls() != null) {
+            product.getImages().clear();
+            List<String> uniqueUrls = new LinkedHashSet<>(request.imageUrls()).stream().toList();
+            for (int i = 0; i < uniqueUrls.size(); i++) {
                 ProductImage img = ProductImage.builder()
-                        .imageUrl(request.imageUrls().get(i))
+                        .imageUrl(uniqueUrls.get(i))
                         .position(i)
                         .build();
                 product.addImage(img);
