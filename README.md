@@ -37,7 +37,7 @@ The core RESTful API and backend services for the AllMart e-commerce platform. B
 
 | Category | Technologies |
 |---|---|
-| Backend | Java 17, Spring Boot 3 |
+| Backend | Java 21, Spring Boot 4 |
 | Security | Spring Security, JWT |
 | Database | PostgreSQL (Neon) |
 | ORM | Spring Data JPA, Hibernate |
@@ -86,7 +86,7 @@ The core RESTful API and backend services for the AllMart e-commerce platform. B
 
 Ensure the following tools are installed on your machine:
 
-- Java Development Kit (JDK) 17+
+- Java Development Kit (JDK) 21+
 - Maven 3.8+
 - PostgreSQL or Neon Database
 
@@ -204,8 +204,6 @@ Access Swagger documentation after starting the server:
 ```text
 http://localhost:8080/swagger-ui/index.html
 ```
-
-![Swagger Preview](./assets/swagger-preview.png)
 
 ---
 
